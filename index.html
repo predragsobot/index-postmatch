@@ -262,6 +262,7 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
   <div class="card">
     <h2>Your Club</h2>
     <div class="sub">This is how your team appears on every report.</div>
+    <div id="clubPreview" class="team-chip" style="display:none;"></div>
     <div id="clubViewOnly" style="display:none;font-size:13px;color:#888;">Log in (top right) to edit your club profile.</div>
     <div id="clubEditRow">
       <div class="row">
@@ -483,6 +484,7 @@ async function saveOwnTeam(){
   const { error } = await sb.from('club_profile').upsert({ id:'main', name, logo_url:logo });
   if(error){ alert('Error saving club: '+error.message); return; }
   STATE.ownTeam = { name, logo };
+  renderClubPreview();
   alert('Club saved.');
 }
 let editingOpponentId = null;
@@ -1068,6 +1070,7 @@ function importBackupFile(input){
       await loadClubProfile(); await loadOpponents(); await loadGames();
       document.getElementById('ownName').value = STATE.ownTeam.name||'';
       document.getElementById('ownLogo').value = STATE.ownTeam.logo||'';
+      renderClubPreview();
       renderOpponents(); populateOpponentSelect(); renderHistory();
       alert('Backup imported successfully.');
     }catch(err){ alert('This file is not a valid backup, or an error occurred: '+err.message); }
@@ -1079,6 +1082,15 @@ function importBackupFile(input){
 /* ============== AUTH ============== */
 function openModal(id){ document.getElementById(id).classList.add('show'); }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function renderClubPreview(){
+  const el = document.getElementById('clubPreview');
+  const t = STATE.ownTeam;
+  if(!t || !t.name){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML = `
+    ${t.logo? `<img src="${t.logo}">` : `<div class="logo-fallback">${t.name.slice(0,2).toUpperCase()}</div>`}
+    <div class="meta"><div class="name">${t.name}</div><div class="tier">Your Club</div></div>`;
+}
 function refreshAuthUI(){
   const loggedIn = !!STATE.session;
   document.getElementById('loginBtn').textContent = loggedIn ? ('Log out ('+(STATE.session.user.email||'')+')') : 'Log in';
@@ -1126,6 +1138,7 @@ async function init(){
   }
   document.getElementById('ownName').value = STATE.ownTeam.name||'';
   document.getElementById('ownLogo').value = STATE.ownTeam.logo||'';
+  renderClubPreview();
   populateOpponentSelect();
   if(STATE.games.length){
     STATE.currentGameId = STATE.games[STATE.games.length-1].id;
