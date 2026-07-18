@@ -645,12 +645,43 @@ function renderStatsForm(){
     <input type="number" step="any" id="ballOpp" value="${game.extra.ball_opp ?? ''}"><div></div></div>`;
   html += `</div>`;
   html += `<div class="stat-section"><h3>Report Images (optional — page 2)</h3>
-    <div class="stat-row"><label>Image 1 URL (e.g. lineup / squad graphic)</label>
-      <input type="text" id="reportImg1" placeholder="https://..." value="${game.extra.image1_url||''}"><div></div></div>
-    <div class="stat-row"><label>Image 2 URL (optional — leave empty to show only Image 1, full width)</label>
-      <input type="text" id="reportImg2" placeholder="https://..." value="${game.extra.image2_url||''}"><div></div></div>
+    <div class="sub" style="margin-top:-6px;">Upload straight from your computer — one big image, or two side by side.</div>
+    <div class="row">
+      <div>
+        <label>Image 1 (e.g. lineup / squad graphic)</label>
+        <input type="file" accept="image/*" id="reportImg1File" onchange="handleImageUpload(this,1)">
+        <div id="reportImg1Status" style="font-size:12px;color:#888;margin:-6px 0 12px;">${game.extra.image1_url? '✓ Image uploaded':'No image yet'}</div>
+        ${game.extra.image1_url? `<img src="${game.extra.image1_url}" style="max-width:160px;border-radius:8px;margin:-6px 0 12px;display:block;">`:''}
+      </div>
+      <div>
+        <label>Image 2 (optional — leave empty to show only Image 1, full width)</label>
+        <input type="file" accept="image/*" id="reportImg2File" onchange="handleImageUpload(this,2)">
+        <div id="reportImg2Status" style="font-size:12px;color:#888;margin:-6px 0 12px;">${game.extra.image2_url? '✓ Image uploaded':'No image yet'}</div>
+        ${game.extra.image2_url? `<img src="${game.extra.image2_url}" style="max-width:160px;border-radius:8px;margin:-6px 0 12px;display:block;">`:''}
+      </div>
+    </div>
   </div>`;
   form.innerHTML = html;
+}
+async function handleImageUpload(input, slot){
+  if(!requireLogin()){ input.value=''; return; }
+  const file = input.files[0];
+  if(!file) return;
+  const game = currentGame();
+  if(!game) return;
+  const statusEl = document.getElementById('reportImg'+slot+'Status');
+  statusEl.textContent = 'Uploading…';
+  const ext = (file.name.split('.').pop()||'jpg').toLowerCase();
+  const path = `${game.id}/image${slot}-${Date.now()}.${ext}`;
+  const { error: upErr } = await sb.storage.from('report-images').upload(path, file, {upsert:true});
+  if(upErr){ statusEl.textContent = 'Upload failed: '+upErr.message; return; }
+  const { data } = sb.storage.from('report-images').getPublicUrl(path);
+  const url = data.publicUrl;
+  game.extra['image'+slot+'_url'] = url;
+  const { error: saveErr } = await sb.from('games').update({ extra: game.extra }).eq('id', game.id);
+  if(saveErr){ statusEl.textContent = 'Saved image but failed to link it: '+saveErr.message; return; }
+  statusEl.textContent = '✓ Image uploaded';
+  renderStatsForm();
 }
 async function saveStats(){
   if(!requireLogin()) return;
@@ -669,10 +700,6 @@ async function saveStats(){
   if(bn) game.extra.ball_neutral = bn.value===''?0:Number(bn.value);
   const bp = document.getElementById('ballOpp');
   if(bp) game.extra.ball_opp = bp.value===''?0:Number(bp.value);
-  const img1 = document.getElementById('reportImg1');
-  if(img1) game.extra.image1_url = img1.value.trim();
-  const img2 = document.getElementById('reportImg2');
-  if(img2) game.extra.image2_url = img2.value.trim();
   const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra }).eq('id', game.id);
   if(error){ alert('Error saving stats: '+error.message); return; }
   renderReport(game.id);
