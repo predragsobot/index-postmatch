@@ -143,6 +143,21 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
 .fb-item .vals .a{color:var(--blue);}
 .fb-item .vals .b{color:var(--gray);}
 .rep-source{text-align:center; font-size:10px; color:var(--ink-dim); padding-bottom:14px; letter-spacing:.03em;}
+.report-page{padding-bottom:6px;}
+.report-page + .report-page{border-top:2px dashed var(--navy-700); margin-top:6px; padding-top:18px;}
+.page-tag{text-align:center; font-size:10px; letter-spacing:.15em; color:var(--ink-dim); font-weight:700; padding:4px 0 14px;}
+.split-chart{margin-top:8px;}
+.split-bar{display:flex; height:16px; border-radius:5px; overflow:hidden; margin-bottom:4px;}
+.split-bar span{display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff;}
+.split-bar span.a{background:var(--blue);}
+.split-bar span.b{background:var(--gray);}
+.split-bar span.c{background:var(--gold);}
+.split-legend{display:flex; justify-content:space-between; font-size:9px; color:var(--ink-dim); margin-bottom:10px;}
+@media print{
+  .report-page{ page-break-after: always; }
+  .report-page:last-child{ page-break-after: auto; }
+  .report-page + .report-page{ border-top:none; margin-top:0; padding-top:0; }
+}
 .actions-bar{display:flex; gap:10px; margin-bottom:16px;}
 
 .dark-page{background:var(--navy-900); border-radius:16px; padding:24px 28px; color:var(--ink); font-family:'Segoe UI',sans-serif;}
@@ -171,6 +186,10 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 /* ---------- LIGHT EXPORT THEME (white bg, blue accents — used for PDF print & JPEG export) ---------- */
 .export-light{ color:#0A1F3D !important; }
 .export-light .rep-header, .export-light .rep-header *{ color:#EAF1FB !important; }
+.export-light .tname{ color:#EAF1FB !important; }
+.export-light .rep-score{ color:#EAF1FB !important; }
+.export-light .fallback{ color:#EAF1FB !important; background:#1B3555 !important; }
+.export-light .rep-eyebrow{ color:#9FB2C9 !important; }
 .export-light .rep-date{ color:#9FB2C9 !important; }
 .export-light#reportWrap, .export-light.dark-page{ background:#FFFFFF !important; }
 .export-light .rep-header{ background:#0A1F3D !important; } /* header stays dark navy, like the pptx */
@@ -197,6 +216,10 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 .export-light .fb-item .vals .a{ color:#1C56C7 !important; }
 .export-light .fb-item .vals .b{ color:#94A0AC !important; }
 .export-light .sub2{ color:#5B7091 !important; }
+.export-light .page-tag, .export-light .split-legend{ color:#5B7091 !important; }
+.export-light .split-bar span.a{ background:#1C56C7 !important; }
+.export-light .split-bar span.b{ background:#94A0AC !important; }
+.export-light .split-bar span.c{ background:#C7900A !important; }
 .export-light table.szn th{ color:#5B7091 !important; border-bottom-color:#D7DEE6 !important; }
 .export-light table.szn td{ border-bottom-color:#E3E7ED !important; color:#0A1F3D !important; }
 .export-light table.szn tr.avg-row td{ color:#1C56C7 !important; border-top-color:#1C56C7 !important; }
@@ -414,9 +437,11 @@ const STATS = [
 ];
 const EXTRA_FIELDS = [
   {key:'throw_ins', label:'Throw-ins'},
-  {key:'box_left', label:'Box Entry – Left'},
-  {key:'box_center', label:'Box Entry – Center'},
-  {key:'box_right', label:'Box Entry – Right'},
+  {key:'box_left', label:'Final 3rd Entry – Left'},
+  {key:'box_center', label:'Final 3rd Entry – Center'},
+  {key:'box_right', label:'Final 3rd Entry – Right'},
+  {key:'cross_right', label:'Crosses – Right'},
+  {key:'cross_left', label:'Crosses – Left'},
 ];
 const TIER_MULT = {top:1.2, best:1.1, group1:1.0, group2:0.9, group3:0.8, group4:0.7};
 const TIER_LABEL = {top:'Top (×1.2)', best:'Best (×1.1)', group1:'Group 1 (×1.0)', group2:'Group 2 (×0.9)', group3:'Group 3 (×0.8)', group4:'Group 4 (×0.7)'};
@@ -456,9 +481,9 @@ function requireLogin(){
 }
 
 /* ============== NAV ============== */
-document.querySelectorAll('.tab').forEach(btn=>{
+document.querySelectorAll('.tab[data-view]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab[data-view]').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('view-'+btn.dataset.view).classList.add('active');
@@ -469,7 +494,7 @@ document.querySelectorAll('.tab').forEach(btn=>{
   });
 });
 function goTo(view){
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  document.querySelectorAll('.tab[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+view));
   if(view==='newgame') populateOpponentSelect();
   if(view==='history') renderHistory();
@@ -664,6 +689,13 @@ function fmtSec(sec){
   const m = Math.floor(sec/60), s = sec%60;
   return m+':' + String(s).padStart(2,'0');
 }
+function fmtDateDMY(dateStr){
+  if(!dateStr) return '';
+  const parts = dateStr.split('-'); // input type=date gives YYYY-MM-DD
+  if(parts.length!==3) return dateStr;
+  const [y,m,d] = parts;
+  return `${d}/${m}/${y}`;
+}
 function computeReport(game){
   const opp = STATE.opponents.find(o=>o.id===game.opponentId) || {name:'Opponent', tier:'group1', logo:''};
   const ownPts = computeSidePoints(game.own);
@@ -715,6 +747,18 @@ function barLine(label, ownDisplay, oppDisplay, ownScale, oppScale){
     <div class="stat-line-bar"><div class="a" style="width:${wa/2}%; margin-left:${50-wa/2}%;"></div><div class="b" style="width:${wb/2}%;"></div></div>
   </div>`;
 }
+function splitBar(leftVal, midVal, rightVal, leftLabel, midLabel, rightLabel){
+  const tot = leftVal+midVal+rightVal || 1;
+  const wl = leftVal/tot*100, wm = midVal/tot*100, wr = rightVal/tot*100;
+  return `<div class="split-chart">
+    <div class="split-bar">
+      <span class="a" style="width:${wl}%;">${leftVal||''}</span>
+      <span class="b" style="width:${wm}%;">${midVal||''}</span>
+      <span class="c" style="width:${wr}%;">${rightVal||''}</span>
+    </div>
+    <div class="split-legend"><span>${leftLabel}</span><span>${midLabel}</span><span>${rightLabel}</span></div>
+  </div>`;
+}
 function renderReport(gameId){
   const game = STATE.games.find(g=>g.id===gameId);
   const wrap = document.getElementById('reportWrap');
@@ -734,6 +778,8 @@ function renderReport(gameId){
   };
   const shotsOwn = v(game.own,'harmless_shot')+v(game.own,'dangerous_shot')+v(game.own,'highly_dangerous_shot')+v(game.own,'certain_goal_shot');
   const shotsOpp = v(game.opp,'harmless_shot')+v(game.opp,'dangerous_shot')+v(game.opp,'highly_dangerous_shot')+v(game.opp,'certain_goal_shot');
+  const chances = (v(game.own,'regular_chance')+v(game.own,'great_chance'));
+  const chancesOpp = (v(game.opp,'regular_chance')+v(game.opp,'great_chance'));
 
   const attackRows = [
     single('Progression (Build-up)', 'prog_first'),
@@ -741,6 +787,7 @@ function renderReport(gameId){
     pair('Counter Attacks / Final 3rd', 'counter_attacks', 'counter_final3rd'),
     single('Crosses', 'cross'),
     {label:'Shots', ownDisplay:String(shotsOwn), oppDisplay:String(shotsOpp), ownScale:shotsOwn, oppScale:shotsOpp},
+    {label:'Chances', ownDisplay:String(chances), oppDisplay:String(chancesOpp), ownScale:chances, oppScale:chancesOpp},
     single('Final 3rd Entries', 'final3rd_entry'),
     single('Box Entries', 'box_entry'),
   ];
@@ -756,10 +803,8 @@ function renderReport(gameId){
     pair('Trigger Press / Recoveries', 'trigger_press', 'trigger_press_recoveries'),
   ];
 
-  const chances = (v(game.own,'regular_chance')+v(game.own,'great_chance'));
-  const chancesOpp = (v(game.opp,'regular_chance')+v(game.opp,'great_chance'));
-
   wrap.innerHTML = `
+  <div class="report-page">
   <div class="rep-header">
     <div class="rep-eyebrow">${(game.competition||'MATCH REPORT').toUpperCase()}</div>
     <div class="rep-teams">
@@ -769,7 +814,7 @@ function renderReport(gameId){
       </div>
       <div>
         <div class="rep-score">${game.scoreHome} – ${game.scoreAway}</div>
-        <div class="rep-date">${game.date||''}</div>
+        <div class="rep-date">${fmtDateDMY(game.date)}</div>
       </div>
       <div class="rep-team">
         ${opp.logo? `<img src="${opp.logo}">`:`<div class="fallback">${opp.name.slice(0,3).toUpperCase()}</div>`}
@@ -797,17 +842,6 @@ function renderReport(gameId){
     </div>
   </div>
 
-  <div class="index-band"><span>ATTACK INDEX</span><span class="vals"><span>${R.ownAttack.toFixed(0)}</span><span>${R.oppAttack.toFixed(0)}</span></span></div>
-  <div class="index-band" style="margin-top:-8px;"><span>DEFENSE INDEX</span><span class="vals"><span>${R.ownDefend.toFixed(0)}</span><span>${R.oppDefend.toFixed(0)}</span></span></div>
-
-  <div class="mq-title">INDEX MATCH QUALITY</div>
-  <div class="mq-grid">
-    <div class="mq-card"><div class="lbl">TOTAL POINTS</div><div class="nums"><span>${R.ownTotal.toFixed(0)}</span><span>${R.oppTotal.toFixed(0)}</span></div></div>
-    <div class="mq-card"><div class="lbl">POINTS (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.ownWeighted.toFixed(0)}</span><span>${R.oppWeighted.toFixed(0)}</span></div></div>
-    <div class="mq-card"><div class="lbl">SHARE %</div><div class="nums"><span>${R.pctTotal[0]}%</span><span>${R.pctTotal[1]}%</span></div></div>
-    <div class="mq-card"><div class="lbl">SHARE % (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.pctWeighted[0]}%</span><span>${R.pctWeighted[1]}%</span></div></div>
-  </div>
-
   <div class="bottom2">
     <div class="bcard">
       <div class="lbl">POSSESSION TIME BY PITCH THIRD</div>
@@ -818,14 +852,14 @@ function renderReport(gameId){
       </div>
     </div>
     <div class="bcard">
-      <div class="lbl">BALL-IN-PLAY TIME DISTRIBUTION (%)</div>
+      <div class="lbl">TIME IN POSSESSION</div>
       <div class="bt-chart">
         ${(()=>{
           const ownSec = (game.extra.ball_own||0)*61, neuSec=(game.extra.ball_neutral||0)*61, oppSec=(game.extra.ball_opp||0)*61;
           const totSec = ownSec+neuSec+oppSec || 1;
           const hOwn = ownSec/totSec*100, hNeu = neuSec/totSec*100, hOpp = oppSec/totSec*100;
           return `<div class="bt-col"><div class="val">${fmtSec(ownSec)}</div><div class="bar" style="height:${hOwn}%; background:var(--blue);"></div><div class="name">${(own.name||'CLUB').toUpperCase()}</div></div>
-        <div class="bt-col"><div class="val">${fmtSec(neuSec)}</div><div class="bar" style="height:${hNeu}%; background:var(--gray);"></div><div class="name">NEUTRAL</div></div>
+        <div class="bt-col"><div class="val">${fmtSec(neuSec)}</div><div class="bar" style="height:${hNeu}%; background:var(--gray);"></div><div class="name">OUT OF PLAY</div></div>
         <div class="bt-col"><div class="val">${fmtSec(oppSec)}</div><div class="bar" style="height:${hOpp}%; background:var(--gold);"></div><div class="name">${opp.name.toUpperCase()}</div></div>`;
         })()}
       </div>
@@ -833,15 +867,42 @@ function renderReport(gameId){
   </div>
 
   <div class="footbar">
-    <div class="lbl">SET PIECES &amp; BOX ENTRIES</div>
+    <div class="lbl">SET PIECES &amp; ENTRIES</div>
     <div class="fb-grid">
-      <div class="fb-item"><div class="n">BOX ENTRIES L / C / R</div><div class="vals"><span class="a">${game.extra.box_left_own||0}/${game.extra.box_center_own||0}/${game.extra.box_right_own||0}</span><span class="b">${game.extra.box_left_opp||0}/${game.extra.box_center_opp||0}/${game.extra.box_right_opp||0}</span></div></div>
-      <div class="fb-item"><div class="n">CHANCES</div><div class="vals"><span class="a">${chances}</span><span class="b">${chancesOpp}</span></div></div>
       <div class="fb-item"><div class="n">THROW-INS</div><div class="vals"><span class="a">${game.extra.throw_ins_own||0}</span><span class="b">${game.extra.throw_ins_opp||0}</span></div></div>
       <div class="fb-item"><div class="n">FREE KICKS / CORNERS</div><div class="vals"><span class="a">${game.own.free_kicks||0}/${game.own.corner_kick||0}</span><span class="b">${game.opp.free_kicks||0}/${game.opp.corner_kick||0}</span></div></div>
     </div>
+    <div class="grid2" style="padding:14px 0 0;">
+      <div>
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${(own.name||'US').toUpperCase()}</div>
+        ${splitBar(game.extra.box_left_own||0, game.extra.box_center_own||0, game.extra.box_right_own||0, 'LEFT','CENTER','RIGHT')}
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${opp.name.toUpperCase()}</div>
+        ${splitBar(game.extra.box_left_opp||0, game.extra.box_center_opp||0, game.extra.box_right_opp||0, 'LEFT','CENTER','RIGHT')}
+      </div>
+      <div>
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">CROSSES R / L — ${(own.name||'US').toUpperCase()}</div>
+        ${splitBar(game.extra.cross_right_own||0, 0, game.extra.cross_left_own||0, 'RIGHT','','LEFT')}
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">CROSSES R / L — ${opp.name.toUpperCase()}</div>
+        ${splitBar(game.extra.cross_right_opp||0, 0, game.extra.cross_left_opp||0, 'RIGHT','','LEFT')}
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="report-page">
+  <div class="page-tag">PAGE 2 — INDEX</div>
+  <div class="index-band"><span>ATTACK INDEX</span><span class="vals"><span>${R.ownAttack.toFixed(0)}</span><span>${R.oppAttack.toFixed(0)}</span></span></div>
+  <div class="index-band" style="margin-top:-8px;"><span>DEFENSE INDEX</span><span class="vals"><span>${R.ownDefend.toFixed(0)}</span><span>${R.oppDefend.toFixed(0)}</span></span></div>
+
+  <div class="mq-title">INDEX MATCH QUALITY</div>
+  <div class="mq-grid">
+    <div class="mq-card"><div class="lbl">TOTAL POINTS</div><div class="nums"><span>${R.ownTotal.toFixed(0)}</span><span>${R.oppTotal.toFixed(0)}</span></div></div>
+    <div class="mq-card"><div class="lbl">POINTS (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.ownWeighted.toFixed(0)}</span><span>${R.oppWeighted.toFixed(0)}</span></div></div>
+    <div class="mq-card"><div class="lbl">SHARE %</div><div class="nums"><span>${R.pctTotal[0]}%</span><span>${R.pctTotal[1]}%</span></div></div>
+    <div class="mq-card"><div class="lbl">SHARE % (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.pctWeighted[0]}%</span><span>${R.pctWeighted[1]}%</span></div></div>
   </div>
   <div class="rep-source">Generated by Match Report Builder</div>
+  </div>
   `;
 }
 
