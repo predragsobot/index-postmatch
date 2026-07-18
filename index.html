@@ -161,6 +161,26 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
   .report-page{ page-break-after: always; }
   .report-page:last-child{ page-break-after: auto; }
   .report-page + .report-page{ border-top:none; margin-top:0; padding-top:0; }
+  /* tighten page 1 (actions/possession/set pieces) so it fits one physical page, not two */
+  .report-page:first-child{
+    transform: scale(0.82);
+    transform-origin: top left;
+    width: 122%;
+  }
+  .rep-header{ padding:10px 24px 8px !important; }
+  .rep-team img, .rep-team .fallback{ width:42px !important; height:42px !important; }
+  .rep-score{ font-size:26px !important; }
+  .poss-wrap{ padding:8px 24px !important; }
+  .grid2{ padding:0 24px 8px !important; gap:12px !important; }
+  .stat-card-head{ padding:5px 12px !important; }
+  .stat-line{ padding:3px 12px !important; }
+  .stat-line-top{ margin-bottom:1px !important; }
+  .stat-line-bar{ height:5px !important; }
+  .bottom2{ padding:0 24px 8px !important; gap:12px !important; }
+  .bcard{ padding:8px 14px !important; }
+  .bt-chart{ height:52px !important; }
+  .footbar{ margin:0 24px 12px !important; padding:8px 14px !important; }
+  .split-chart{ margin-top:4px !important; }
 }
 .actions-bar{display:flex; gap:10px; margin-bottom:16px;}
 
@@ -617,8 +637,15 @@ function renderStatsForm(){
   if(!game){ form.innerHTML = '<div class="empty">Create a game first (New Game tab).</div>'; document.getElementById('statsTitle').textContent='Enter Match Stats'; return; }
   const opp = STATE.opponents.find(o=>o.id===game.opponentId);
   document.getElementById('statsTitle').textContent = `Enter Stats — ${STATE.ownTeam.name} vs ${opp?opp.name:'Opponent'}`;
-  const phases = [['attack','Attacking Phase'],['defend','Defending Phase'],['setpiece','Set Pieces'],['other','Other']];
   let html='';
+  html += `<div class="stat-section"><h3>Match Score</h3>
+    <div class="row">
+      <div><label>${STATE.ownTeam.name||'Your Club'} — goals</label><input type="number" id="editScoreHome" value="${game.scoreHome}"></div>
+      <div><label>${opp?opp.name:'Opponent'} — goals</label><input type="number" id="editScoreAway" value="${game.scoreAway}"></div>
+      <div style="display:flex; align-items:flex-end; padding-bottom:12px;"><button type="button" class="btn secondary" onclick="autoFillScore()">Auto-fill from Goal stats below</button></div>
+    </div>
+  </div>`;
+  const phases = [['attack','Attacking Phase'],['defend','Defending Phase'],['setpiece','Set Pieces'],['other','Other']];
   phases.forEach(([ph,label])=>{
     const rows = STATS.filter(s=>s.phase===ph);
     html += `<div class="stat-section"><h3>${label}</h3><div class="stat-head"><div>Statistic</div><div>${STATE.ownTeam.name||'Your Club'}</div><div>${opp?opp.name:'Opponent'}</div></div>`;
@@ -683,6 +710,14 @@ async function handleImageUpload(input, slot){
   statusEl.textContent = '✓ Image uploaded';
   renderStatsForm();
 }
+function autoFillScore(){
+  const ownGoal = Number(document.querySelector('input[data-side="own"][data-key="goal"]')?.value)||0;
+  const ownGoalCA = Number(document.querySelector('input[data-side="own"][data-key="goal_ca"]')?.value)||0;
+  const oppGoal = Number(document.querySelector('input[data-side="opp"][data-key="goal"]')?.value)||0;
+  const oppGoalCA = Number(document.querySelector('input[data-side="opp"][data-key="goal_ca"]')?.value)||0;
+  document.getElementById('editScoreHome').value = ownGoal+ownGoalCA;
+  document.getElementById('editScoreAway').value = oppGoal+oppGoalCA;
+}
 async function saveStats(){
   if(!requireLogin()) return;
   const game = currentGame();
@@ -694,13 +729,17 @@ async function saveStats(){
   document.querySelectorAll('#statsForm input[data-extra]').forEach(inp=>{
     game.extra[inp.dataset.key+'_'+inp.dataset.extra] = inp.value===''? 0 : Number(inp.value);
   });
+  const sh = document.getElementById('editScoreHome');
+  if(sh) game.scoreHome = sh.value===''?0:Number(sh.value);
+  const sa = document.getElementById('editScoreAway');
+  if(sa) game.scoreAway = sa.value===''?0:Number(sa.value);
   const bo = document.getElementById('ballOwn');
   if(bo) game.extra.ball_own = bo.value===''?0:Number(bo.value);
   const bn = document.getElementById('ballNeutral');
   if(bn) game.extra.ball_neutral = bn.value===''?0:Number(bn.value);
   const bp = document.getElementById('ballOpp');
   if(bp) game.extra.ball_opp = bp.value===''?0:Number(bp.value);
-  const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra }).eq('id', game.id);
+  const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra, score_own:game.scoreHome, score_opp:game.scoreAway }).eq('id', game.id);
   if(error){ alert('Error saving stats: '+error.message); return; }
   renderReport(game.id);
   goTo('report');
