@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Match Report Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy-950:#0A1730;
+  --navy-900:#0E1F38;
+  --navy-800:#112640;
+  --navy-700:#1B3555;
+  --navy-650:#0D2036;
+  --blue:#38BDF8;
+  --gold:#F5B942;
+  --gray:#5B7091;
+  --ink:#EAF1FB;
+  --ink-dim:#9FB2C9;
+  --red:#EF6461;
+  --green:#4ADE80;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:#F5F7FA; color:#1a1a1a; min-height:100vh;
+}
+.topbar{
+  background:var(--navy-900); color:var(--ink); padding:14px 24px;
+  display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+}
+.topbar h1{font-size:16px; letter-spacing:.08em; margin:0; text-transform:uppercase; font-weight:700; color:var(--ink);}
+.tabs{display:flex; gap:4px; flex-wrap:wrap;}
+.tab{
+  background:transparent; border:1px solid transparent; color:var(--ink-dim);
+  padding:8px 14px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;
+}
+.tab.active{background:var(--navy-700); color:#fff;}
+.tab:hover{color:#fff;}
+.view{display:none; max-width:1200px; margin:0 auto; padding:24px;}
+.view.active{display:block;}
+.card{
+  background:#fff; border-radius:14px; padding:22px; margin-bottom:18px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #E7EBF0;
+}
+.card h2{margin:0 0 4px; font-size:17px;}
+.card .sub{color:#6b7280; font-size:13px; margin-bottom:16px;}
+label{font-size:12px; font-weight:600; color:#42505f; display:block; margin-bottom:4px;}
+input, select{
+  width:100%; padding:8px 10px; border:1px solid #D7DEE6; border-radius:8px; font-size:14px;
+  margin-bottom:12px; background:#fff;
+}
+input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue);}
+.btn{
+  background:var(--navy-900); color:#fff; border:none; padding:10px 18px; border-radius:8px;
+  font-weight:600; cursor:pointer; font-size:14px;
+}
+.btn:hover{background:var(--navy-700);}
+.btn.secondary{background:#fff; color:var(--navy-900); border:1px solid #D7DEE6;}
+.btn.danger{background:var(--red); }
+.row{display:flex; gap:16px; flex-wrap:wrap;}
+.row > *{flex:1; min-width:200px;}
+.team-chip{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #E7EBF0;
+  border-radius:10px; margin-bottom:8px; background:#FAFBFC;
+}
+.team-chip img, .logo-fallback{
+  width:36px; height:36px; border-radius:50%; object-fit:cover; background:#e5e9ee;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#666;
+}
+.team-chip .meta{flex:1;}
+.team-chip .name{font-weight:600; font-size:14px;}
+.team-chip .tier{font-size:11px; color:#888;}
+.stat-section{margin-bottom:22px;}
+.stat-section h3{
+  font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--navy-900);
+  border-bottom:2px solid var(--navy-700); padding-bottom:6px; margin-bottom:10px;
+}
+.stat-row{display:grid; grid-template-columns:1fr 110px 110px; gap:10px; align-items:center; margin-bottom:6px;}
+.stat-row label{margin:0; font-weight:500; font-size:13px; color:#333;}
+.stat-row input{margin:0;}
+.stat-head{display:grid; grid-template-columns:1fr 110px 110px; gap:10px; font-size:11px; color:#888; font-weight:700; margin-bottom:4px; text-transform:uppercase;}
+.history-item{
+  display:flex; justify-content:space-between; align-items:center; padding:12px 14px;
+  border:1px solid #E7EBF0; border-radius:10px; margin-bottom:8px; cursor:pointer;
+}
+.history-item:hover{background:#FAFBFC;}
+.pill{padding:2px 8px; border-radius:100px; font-size:11px; font-weight:700; background:#EEF2F7; color:#444;}
+.empty{color:#888; font-size:13px; padding:20px; text-align:center;}
+
+/* ---------- REPORT (dark) ---------- */
+#reportWrap{background:var(--navy-900); border-radius:16px; overflow:hidden; color:var(--ink); font-family:'Segoe UI',sans-serif;}
+.rep-header{background:var(--navy-900); padding:20px 28px 16px; border-bottom:2px solid var(--navy-700); position:relative;}
+.rep-eyebrow{font-size:12px; letter-spacing:.15em; color:var(--ink-dim); font-weight:700; margin-bottom:10px;}
+.rep-teams{display:flex; align-items:center; justify-content:center; gap:28px;}
+.rep-team{display:flex; flex-direction:column; align-items:center; width:220px;}
+.rep-team img, .rep-team .fallback{width:56px; height:56px; border-radius:50%; object-fit:cover; background:var(--navy-700); margin-bottom:6px; display:flex;align-items:center;justify-content:center; font-weight:700;}
+.rep-team .tname{font-weight:700; font-size:15px; letter-spacing:.03em;}
+.rep-score{font-size:34px; font-weight:800; min-width:120px; text-align:center;}
+.rep-date{font-size:12px; color:var(--ink-dim); text-align:center; margin-top:2px;}
+.poss-wrap{padding:14px 28px 18px;}
+.poss-label{font-size:11px; letter-spacing:.1em; color:var(--ink-dim); margin-bottom:6px; font-weight:700;}
+.poss-bar{display:flex; height:22px; border-radius:6px; overflow:hidden; background:var(--navy-700);}
+.poss-bar .a{background:var(--blue); display:flex; align-items:center; padding-left:8px; font-size:12px; font-weight:700; color:#03202e;}
+.poss-bar .b{background:transparent; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:12px; font-weight:700; color:var(--ink);}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:0 28px 16px;}
+.stat-card{background:var(--navy-800); border-radius:10px; overflow:hidden;}
+.stat-card-head{background:var(--navy-650); padding:8px 14px; font-size:12px; font-weight:700; letter-spacing:.06em;}
+.stat-line{padding:6px 14px;}
+.stat-line-top{display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:3px;}
+.stat-line-bar{display:flex; height:7px; border-radius:4px; overflow:hidden; background:var(--navy-700);}
+.stat-line-bar .a{background:var(--blue);}
+.stat-line-bar .b{background:var(--gray);}
+.index-band{margin:0 28px 16px; background:var(--navy-700); border-radius:8px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:14px; letter-spacing:.05em;}
+.index-band .vals{display:flex; gap:14px; font-size:20px;}
+.index-band .vals span:first-child{color:var(--blue);}
+.index-band .vals span:last-child{color:var(--gray);}
+.mq-title{padding:0 28px; font-size:11px; letter-spacing:.12em; color:var(--ink-dim); font-weight:700; margin-bottom:8px;}
+.mq-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:0 28px 18px;}
+.mq-card{background:var(--navy-800); border-radius:10px; padding:12px 14px;}
+.mq-card .lbl{font-size:10px; color:var(--ink-dim); font-weight:700; letter-spacing:.05em; margin-bottom:8px;}
+.mq-card .nums{display:flex; gap:10px; align-items:baseline;}
+.mq-card .nums span:first-child{font-size:22px; font-weight:800; color:var(--blue);}
+.mq-card .nums span:last-child{font-size:22px; font-weight:800; color:var(--gray);}
+.bottom2{display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:0 28px 18px;}
+.bcard{background:var(--navy-800); border-radius:10px; padding:12px 16px;}
+.bcard .lbl{font-size:11px; color:var(--ink-dim); font-weight:700; letter-spacing:.06em; margin-bottom:10px;}
+.thirds-row{display:flex; justify-content:space-between; margin-bottom:8px;}
+.thirds-row .tcol{text-align:center; flex:1;}
+.thirds-row .tcol .n{font-size:10px; color:var(--ink-dim); font-weight:700;}
+.thirds-row .tcol .v{font-size:15px; font-weight:800;}
+.bt-chart{display:flex; align-items:flex-end; gap:8px; height:70px; margin-top:6px;}
+.bt-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+.bt-col .bar{width:100%; border-radius:4px 4px 0 0;}
+.bt-col .val{font-size:11px; font-weight:700; margin-bottom:2px;}
+.bt-col .name{font-size:9px; color:var(--ink-dim); margin-top:4px; text-align:center;}
+.footbar{background:var(--navy-800); margin:0 28px 24px; border-radius:10px; padding:14px 18px;}
+.footbar .lbl{font-size:11px; color:var(--ink-dim); font-weight:700; letter-spacing:.06em; margin-bottom:10px;}
+.fb-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+.fb-item{text-align:center;}
+.fb-item .n{font-size:9px; color:var(--ink-dim); font-weight:700; margin-bottom:6px;}
+.fb-item .vals{display:flex; justify-content:center; gap:6px; font-size:13px; font-weight:800;}
+.fb-item .vals .a{color:var(--blue);}
+.fb-item .vals .b{color:var(--gray);}
+.rep-source{text-align:center; font-size:10px; color:var(--ink-dim); padding-bottom:14px; letter-spacing:.03em;}
+.report-page{padding-bottom:6px;}
+.report-page + .report-page{border-top:2px dashed var(--navy-700); margin-top:6px; padding-top:18px;}
+.page-tag{text-align:center; font-size:10px; letter-spacing:.15em; color:var(--ink-dim); font-weight:700; padding:4px 0 14px;}
+.split-chart{margin-top:8px;}
+.split-bar{display:flex; height:16px; border-radius:5px; overflow:hidden; margin-bottom:4px;}
+.split-bar span{display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff;}
+.split-bar span.a{background:var(--blue);}
+.split-bar span.b{background:var(--gray);}
+.split-bar span.c{background:var(--gold);}
+.split-legend{display:flex; justify-content:space-between; font-size:9px; color:var(--ink-dim); margin-bottom:10px;}
+.report-images{padding:0 28px 20px; display:grid; gap:14px; flex:1;}
+.report-images.one{grid-template-columns:1fr;}
+.report-images.two{grid-template-columns:1fr 1fr;}
+.report-images img{width:100%; height:100%; max-height:640px; object-fit:contain; border-radius:10px; background:var(--navy-800); display:block;}
+@media print{
+  .report-page{ page-break-after: always; }
+  .report-page:last-child{ page-break-after: auto; }
+  .report-page + .report-page{ border-top:none; margin-top:0; padding-top:0; }
+}
+.actions-bar{display:flex; gap:10px; margin-bottom:16px;}
+
+.dark-page{background:var(--navy-900); border-radius:16px; padding:24px 28px; color:var(--ink); font-family:'Segoe UI',sans-serif;}
+.dark-page h2{margin:0 0 4px; font-size:18px; letter-spacing:.04em;}
+.dark-page .sub2{color:var(--ink-dim); font-size:12px; margin-bottom:18px;}
+.opp-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px;}
+.opp-card{background:var(--navy-800); border-radius:10px; padding:14px; text-align:center;}
+.opp-card img, .opp-card .fb{width:48px; height:48px; border-radius:50%; object-fit:cover; background:var(--navy-700); margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-weight:700;}
+.opp-card .oname{font-weight:700; font-size:14px; margin-bottom:2px;}
+.opp-card .otier{font-size:10px; color:var(--gold); font-weight:700; margin-bottom:10px;}
+.opp-card .orow{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-dim); padding:3px 0; border-top:1px solid var(--navy-700);}
+.opp-card .orow b{color:var(--ink); font-weight:700;}
+table.szn{width:100%; border-collapse:collapse; font-size:12.5px;}
+table.szn th{text-align:left; font-size:10px; letter-spacing:.05em; color:var(--ink-dim); font-weight:700; padding:8px 10px; border-bottom:2px solid var(--navy-700);}
+table.szn td{padding:7px 10px; border-bottom:1px solid var(--navy-700);}
+table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); border-bottom:none; color:var(--blue); padding-top:12px;}
+.tag-tier{font-size:9px; padding:2px 7px; border-radius:100px; background:var(--navy-700); color:var(--gold); font-weight:700;}
+
+.modal-overlay{display:none; position:fixed; inset:0; background:rgba(10,20,35,.55); z-index:100; align-items:center; justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff; border-radius:14px; padding:22px; width:360px; max-width:90vw;}
+.modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+.modal-head h3{margin:0; font-size:16px;}
+.modal-close{background:none; border:none; font-size:20px; cursor:pointer; color:#888;}
+
+/* ---------- LIGHT EXPORT THEME (white bg, blue accents — used for PDF print & JPEG export) ---------- */
+.export-light{ color:#0A1F3D !important; }
+.export-light .rep-header, .export-light .rep-header *{ color:#EAF1FB !important; }
+.export-light .tname{ color:#EAF1FB !important; }
+.export-light .rep-score{ color:#EAF1FB !important; }
+.export-light .fallback{ color:#EAF1FB !important; background:#1B3555 !important; }
+.export-light .rep-eyebrow{ color:#9FB2C9 !important; }
+.export-light .rep-date{ color:#9FB2C9 !important; }
+.export-light#reportWrap, .export-light.dark-page{ background:#FFFFFF !important; }
+.export-light .rep-header{ background:#0A1F3D !important; } /* header stays dark navy, like the pptx */
+.export-light .poss-wrap, .export-light .mq-title, .export-light .rep-source{ color:#0A1F3D !important; }
+.export-light .poss-label{ color:#5B7091 !important; }
+.export-light .poss-bar{ background:#E3E7ED !important; }
+.export-light .poss-bar .a{ background:#1C56C7 !important; color:#fff !important; }
+.export-light .poss-bar .b{ color:#0A1F3D !important; }
+.export-light .stat-card, .export-light .mq-card, .export-light .bcard, .export-light .footbar, .export-light .opp-card{ background:#F5F7FA !important; border:1px solid #E3E7ED; }
+.export-light .stat-card-head{ background:#E6EDFB !important; color:#0A1F3D !important; }
+.export-light .stat-line-top span:first-child{ color:#1C56C7 !important; }
+.export-light .stat-line-top span:last-child{ color:#94A0AC !important; }
+.export-light .stat-line-top span:nth-child(2){ color:#5B7091 !important; }
+.export-light .stat-line-bar{ background:#E3E7ED !important; }
+.export-light .stat-line-bar .a{ background:#1C56C7 !important; }
+.export-light .stat-line-bar .b{ background:#94A0AC !important; }
+.export-light .index-band{ background:#E6EDFB !important; color:#0A1F3D !important; }
+.export-light .index-band .vals span:first-child{ color:#1C56C7 !important; }
+.export-light .index-band .vals span:last-child{ color:#94A0AC !important; }
+.export-light .mq-title, .export-light .mq-card .lbl, .export-light .bcard .lbl, .export-light .footbar .lbl{ color:#5B7091 !important; }
+.export-light .mq-card .nums span:first-child{ color:#1C56C7 !important; }
+.export-light .mq-card .nums span:last-child{ color:#94A0AC !important; }
+.export-light .thirds-row .n, .export-light .bt-col .name, .export-light .fb-item .n{ color:#5B7091 !important; }
+.export-light .fb-item .vals .a{ color:#1C56C7 !important; }
+.export-light .fb-item .vals .b{ color:#94A0AC !important; }
+.export-light .sub2{ color:#5B7091 !important; }
+.export-light .page-tag, .export-light .split-legend{ color:#5B7091 !important; }
+.export-light .split-bar span.a{ background:#1C56C7 !important; }
+.export-light .split-bar span.b{ background:#94A0AC !important; }
+.export-light .split-bar span.c{ background:#C7900A !important; }
+.export-light .report-images img{ background:#F5F7FA !important; }
+.export-light table.szn th{ color:#5B7091 !important; border-bottom-color:#D7DEE6 !important; }
+.export-light table.szn td{ border-bottom-color:#E3E7ED !important; color:#0A1F3D !important; }
+.export-light table.szn tr.avg-row td{ color:#1C56C7 !important; border-top-color:#1C56C7 !important; }
+.export-light .opp-card .otier{ color:#B8860B !important; }
+.export-light .tag-tier{ background:#E6EDFB !important; color:#1C56C7 !important; }
+
+@media print{
+  body *{visibility:hidden;}
+  .printable, .printable *{visibility:visible;}
+  .printable{position:absolute; top:0; left:0; width:100%; border-radius:0;}
+  @page{size: A4 landscape; margin:8mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⚽ Match Report Builder</h1>
+  <div class="tabs">
+    <button class="tab active" data-view="teams">Teams</button>
+    <button class="tab" data-view="newgame">New Game</button>
+    <button class="tab" data-view="stats">Enter Stats</button>
+    <button class="tab" data-view="report">Report</button>
+    <button class="tab" data-view="opponents">Opponents</button>
+    <button class="tab" data-view="seasonstats">Season Stats</button>
+    <button class="tab" data-view="history">History</button>
+  </div>
+  <div style="flex:1;"></div>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span id="connLabel" style="font-size:11px; color:var(--ink-dim);">Connecting…</span>
+    <button class="tab" id="loginBtn" style="border:1px solid var(--navy-700);">Log in</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Staff login</h3><button class="modal-close" onclick="closeModal('loginModal')">&times;</button></div>
+    <p style="font-size:13px; color:#666; margin:0 0 14px;">Viewing everything (teams, reports, season stats) is public. Logging in is only needed to add or edit data. Accounts are created in the Supabase dashboard (Authentication → Users).</p>
+    <label>Email</label><input type="text" id="loginEmail" autocomplete="username">
+    <label>Password</label><input type="password" id="loginPass" autocomplete="current-password">
+    <div id="loginError" style="color:var(--red); font-size:12px; margin-bottom:10px;"></div>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn secondary" onclick="closeModal('loginModal')">Cancel</button>
+      <button class="btn" id="loginSubmit">Log in</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEAMS -->
+<div class="view active" id="view-teams">
+  <div class="card">
+    <h2>Backup &amp; Archive</h2>
+    <div class="sub">This app saves automatically, but keep your own copy — download it and store it on Google Drive, your laptop, wherever you like.</div>
+    <div class="row">
+      <div><button class="btn" onclick="exportBackup()">⬇ Export Backup (.json)</button></div>
+      <div>
+        <label>Restore from backup file</label>
+        <input type="file" accept=".json" onchange="importBackupFile(this)">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your Club</h2>
+    <div class="sub">This is how your team appears on every report.</div>
+    <div id="clubPreview" class="team-chip" style="display:none;"></div>
+    <div id="clubViewOnly" style="display:none;font-size:13px;color:#888;">Log in (top right) to edit your club profile.</div>
+    <div id="clubEditRow">
+      <div class="row">
+        <div><label>Club name</label><input id="ownName" placeholder="e.g. Atromitos FC"></div>
+        <div><label>Logo URL (optional)</label><input id="ownLogo" placeholder="https://..."></div>
+      </div>
+      <button class="btn" onclick="saveOwnTeam()">Save Club</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Opponent Database</h2>
+    <div class="sub">Add every opponent once. Set their strength tier — it auto-applies the correct INDEX multiplier every time you play them.</div>
+    <div id="oppViewOnly" style="display:none;font-size:13px;color:#888;margin-bottom:10px;">Log in (top right) to add or edit opponents.</div>
+    <div id="oppAddForm">
+      <div class="row">
+        <div><label>Team name</label><input id="oppName" placeholder="e.g. PAOK"></div>
+        <div><label>Logo URL (optional)</label><input id="oppLogo" placeholder="https://..."></div>
+        <div>
+          <label>Strength tier</label>
+          <select id="oppTier">
+            <option value="top">Top (×1.2)</option>
+            <option value="best">Best (×1.1)</option>
+            <option value="group1" selected>Group 1 (×1.0)</option>
+            <option value="group2">Group 2 (×0.9)</option>
+            <option value="group3">Group 3 (×0.8)</option>
+            <option value="group4">Group 4 (×0.7)</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="oppSubmitBtn" onclick="addOpponent()">Add Opponent</button>
+      <button class="btn secondary" id="oppCancelBtn" style="display:none;" onclick="cancelEditOpponent()">Cancel</button>
+    </div>
+    <div id="oppList" style="margin-top:16px;"></div>
+  </div>
+</div>
+
+<!-- NEW GAME -->
+<div class="view" id="view-newgame">
+  <div class="card">
+    <h2>New Game</h2>
+    <div class="sub">Pick the opponent from your database, set the date and final score.</div>
+    <div class="row">
+      <div>
+        <label>Opponent</label>
+        <select id="ngOpponent"></select>
+      </div>
+      <div><label>Competition (optional)</label><input id="ngComp" placeholder="e.g. Super League"></div>
+    </div>
+    <div class="row">
+      <div><label>Match date</label><input id="ngDate" type="date"></div>
+      <div><label>Goals — your club</label><input id="ngScoreHome" type="number" value="0"></div>
+      <div><label>Goals — opponent</label><input id="ngScoreAway" type="number" value="0"></div>
+    </div>
+    <button class="btn" onclick="createGame()">Create Game &amp; Go to Stats →</button>
+  </div>
+</div>
+
+<!-- STATS ENTRY -->
+<div class="view" id="view-stats">
+  <div class="card">
+    <h2 id="statsTitle">Enter Match Stats</h2>
+    <div class="sub">Left column = your club, right column = opponent. Values match your Nacsport export categories.</div>
+    <div id="statsForm"></div>
+    <div class="actions-bar">
+      <button class="btn" onclick="saveStats()">Save &amp; Generate Report →</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT -->
+<div class="view" id="view-report">
+  <div class="actions-bar">
+    <button class="btn secondary" onclick="exportPDF('reportWrap')">⬇ Export to PDF</button>
+    <button class="btn secondary" onclick="exportImage('reportWrap','match-report')">⬇ Export as JPEG</button>
+    <button class="btn secondary" onclick="editCurrentGame()">✎ Edit This Report</button>
+    <button class="btn danger" onclick="deleteCurrentGame()">🗑 Delete This Report</button>
+  </div>
+  <div id="reportWrap" class="printable"><div class="empty">No report yet — create a game and enter stats first.</div></div>
+</div>
+
+<!-- OPPONENTS OVERVIEW -->
+<div class="view" id="view-opponents">
+  <div class="actions-bar">
+    <button class="btn secondary" onclick="exportPDF('opponentsWrap')">⬇ Export to PDF</button>
+    <button class="btn secondary" onclick="exportImage('opponentsWrap','opponents')">⬇ Export as JPEG</button>
+  </div>
+  <div id="opponentsWrap" class="printable"><div class="empty">No opponents yet.</div></div>
+</div>
+
+<!-- SEASON STATS -->
+<div class="view" id="view-seasonstats">
+  <div class="actions-bar">
+    <button class="btn secondary" onclick="exportPDF('seasonWrap')">⬇ Export to PDF</button>
+    <button class="btn secondary" onclick="exportImage('seasonWrap','season-stats')">⬇ Export as JPEG</button>
+  </div>
+  <div id="seasonWrap" class="printable"><div class="empty">No games played yet.</div></div>
+</div>
+
+<!-- HISTORY -->
+<div class="view" id="view-history">
+  <div class="card">
+    <h2>Saved Games</h2>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<script>
+/* ============== CONFIG: STAT DEFINITIONS (from Excel formulas) ============== */
+const STATS = [
+  {key:'goal', label:'Goal', points:8, phase:'attack'},
+  {key:'goal_ca', label:'Goal (Counter Attack)', points:10, phase:'attack'},
+  {key:'harmless_shot', label:'Harmless Shot', points:0.5, phase:'attack'},
+  {key:'dangerous_shot', label:'Dangerous Shot', points:1, phase:'attack'},
+  {key:'highly_dangerous_shot', label:'Highly Dangerous Shot', points:1.5, phase:'attack'},
+  {key:'certain_goal_shot', label:'Certain Goal Shot', points:2, phase:'attack'},
+  {key:'regular_chance', label:'Regular Chance', points:1.5, phase:'attack'},
+  {key:'great_chance', label:'Great Chance', points:2, phase:'attack'},
+  {key:'prog_first', label:'Progression Pass/Drive (First Third)', points:0.7, phase:'attack'},
+  {key:'prog_second', label:'Progression Pass/Drive (Second Third)', points:1.3, phase:'attack'},
+  {key:'zone1_poss', label:'1st Zone Possession — time (mm.ss)', points:1.3, phase:'attack'},
+  {key:'zone2_poss', label:'2nd Zone Possession — time (mm.ss)', points:1.0, phase:'attack'},
+  {key:'zone3_poss', label:'3rd Zone Possession — time (mm.ss)', points:1.7, phase:'attack'},
+  {key:'counter_attacks', label:'Counter Attacks', points:1, phase:'attack'},
+  {key:'counter_final3rd', label:'Counter Attacks / Final Third', phase:'attack', type:'ratioPrev', base:'counter_attacks', mult:20},
+  {key:'cross', label:'Cross', points:0.5, phase:'attack'},
+  {key:'final3rd_entry', label:'Final Third Entry', points:0.8, phase:'attack'},
+  {key:'box_entry', label:'Box Entry', points:1.3, phase:'attack'},
+
+  {key:'high_zone', label:'High Zone (actions)', phase:'defend', type:'ratioNext', next:'press_high', mult:20},
+  {key:'press_high', label:'Press High', phase:'defend', type:'ratioNext', next:'high_press_recoveries', mult:30},
+  {key:'high_press_recoveries', label:'High Press Recoveries', points:1.5, phase:'defend'},
+  {key:'mid_zone', label:'Mid Zone (actions)', phase:'defend', type:'ratioNext', next:'press_mid', mult:20},
+  {key:'press_mid', label:'Press Mid', phase:'defend', type:'ratioNext', next:'middle_press_recoveries', mult:30},
+  {key:'middle_press_recoveries', label:'Middle Press Recoveries', points:1, phase:'defend'},
+  {key:'ball_recoveries_opp_half', label:"Ball Recoveries (Opponent's Half)", points:1.5, phase:'defend'},
+  {key:'repress', label:'Repress', points:0, phase:'defend'},
+  {key:'repress_recoveries', label:'Repress Recoveries', phase:'defend', type:'ratioPrev', base:'repress', mult:40},
+  {key:'gk_saves', label:'Goalkeeper Saves', points:1.5, phase:'defend'},
+  {key:'clearance_after_cross', label:'Clearance After a Cross', points:1.5, phase:'defend'},
+  {key:'trigger_press', label:'Trigger Press', points:0, phase:'defend'},
+  {key:'trigger_press_recoveries', label:'Trigger Press Recoveries', phase:'defend', type:'ratioPrev', base:'trigger_press', mult:20},
+
+  {key:'free_kicks', label:'Free Kicks', points:1, phase:'setpiece'},
+  {key:'corner_kick', label:'Corner Kick', points:1.5, phase:'setpiece'},
+
+  {key:'red_card', label:'Red Card', points:-5, phase:'other'},
+];
+const EXTRA_FIELDS = [
+  {key:'throw_ins', label:'Throw-ins'},
+  {key:'box_left', label:'Final 3rd Entry – Left'},
+  {key:'box_center', label:'Final 3rd Entry – Center'},
+  {key:'box_right', label:'Final 3rd Entry – Right'},
+  {key:'cross_right', label:'Crosses – Right'},
+  {key:'cross_left', label:'Crosses – Left'},
+];
+const TIER_MULT = {top:1.2, best:1.1, group1:1.0, group2:0.9, group3:0.8, group4:0.7};
+const TIER_LABEL = {top:'Top (×1.2)', best:'Best (×1.1)', group1:'Group 1 (×1.0)', group2:'Group 2 (×0.9)', group3:'Group 3 (×0.8)', group4:'Group 4 (×0.7)'};
+
+/* ============== SUPABASE CONFIG ============== */
+/* Fill these in from: Supabase Dashboard -> Project Settings -> API */
+const SUPABASE_URL = "https://kvpzfzenzpblbwtxqqsi.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_7QJbzTmx4UmUHQ4A7EdWEw_ABom8AxA";
+const CONFIGURED = !SUPABASE_URL.includes('YOUR_SUPABASE') && !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE');
+const sb = CONFIGURED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+let STATE = { ownTeam:{name:'My Club', logo:''}, opponents:[], games:[], currentGameId:null, session:null };
+
+/* ============== DATA LAYER (Supabase) ============== */
+async function loadClubProfile(){
+  const { data, error } = await sb.from('club_profile').select('*').eq('id','main').maybeSingle();
+  if(error) throw error;
+  STATE.ownTeam = data ? {name:data.name, logo:data.logo_url||''} : {name:'My Club', logo:''};
+}
+async function loadOpponents(){
+  const { data, error } = await sb.from('opponents').select('*').order('name');
+  if(error) throw error;
+  STATE.opponents = (data||[]).map(o=>({id:o.id, name:o.name, logo:o.logo_url||'', tier:o.tier}));
+}
+async function loadGames(){
+  const { data, error } = await sb.from('games').select('*').order('date',{ascending:true});
+  if(error) throw error;
+  STATE.games = (data||[]).map(g=>({
+    id:g.id, opponentId:g.opponent_id, date:g.date, competition:g.competition||'',
+    scoreHome:g.score_own||0, scoreAway:g.score_opp||0,
+    own:g.own_stats||{}, opp:g.opp_stats||{}, extra:g.extra||{}
+  }));
+}
+function requireLogin(){
+  if(!STATE.session){ alert('Please log in (top right) to make changes.'); return false; }
+  return true;
+}
+
+/* ============== NAV ============== */
+document.querySelectorAll('.tab[data-view]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab[data-view]').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    if(btn.dataset.view==='newgame') populateOpponentSelect();
+    if(btn.dataset.view==='history') renderHistory();
+    if(btn.dataset.view==='opponents') renderOpponentsPage();
+    if(btn.dataset.view==='seasonstats') renderSeasonStats();
+  });
+});
+function goTo(view){
+  document.querySelectorAll('.tab[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+view));
+  if(view==='newgame') populateOpponentSelect();
+  if(view==='history') renderHistory();
+  if(view==='opponents') renderOpponentsPage();
+  if(view==='seasonstats') renderSeasonStats();
+}
+
+/* ============== TEAMS TAB ============== */
+async function saveOwnTeam(){
+  if(!requireLogin()) return;
+  const name = document.getElementById('ownName').value || 'My Club';
+  const logo = document.getElementById('ownLogo').value;
+  const { error } = await sb.from('club_profile').upsert({ id:'main', name, logo_url:logo });
+  if(error){ alert('Error saving club: '+error.message); return; }
+  STATE.ownTeam = { name, logo };
+  renderClubPreview();
+  alert('Club saved.');
+}
+let editingOpponentId = null;
+async function addOpponent(){
+  if(!requireLogin()) return;
+  const name = document.getElementById('oppName').value.trim();
+  if(!name){ alert('Enter a team name'); return; }
+  const logo = document.getElementById('oppLogo').value;
+  const tier = document.getElementById('oppTier').value;
+  if(editingOpponentId){
+    const { error } = await sb.from('opponents').update({name, logo_url:logo, tier}).eq('id', editingOpponentId);
+    if(error){ alert('Error: '+error.message); return; }
+    editingOpponentId = null;
+    document.getElementById('oppSubmitBtn').textContent = 'Add Opponent';
+    document.getElementById('oppCancelBtn').style.display = 'none';
+  } else {
+    const { error } = await sb.from('opponents').insert({name, logo_url:logo, tier});
+    if(error){ alert('Error: '+error.message); return; }
+  }
+  await loadOpponents();
+  document.getElementById('oppName').value=''; document.getElementById('oppLogo').value='';
+  document.getElementById('oppTier').value='group1';
+  renderOpponents();
+  populateOpponentSelect();
+}
+function editOpponent(id){
+  if(!requireLogin()) return;
+  const o = STATE.opponents.find(x=>x.id===id);
+  if(!o) return;
+  editingOpponentId = id;
+  document.getElementById('oppName').value = o.name;
+  document.getElementById('oppLogo').value = o.logo||'';
+  document.getElementById('oppTier').value = o.tier;
+  document.getElementById('oppSubmitBtn').textContent = 'Save Changes';
+  document.getElementById('oppCancelBtn').style.display = 'inline-block';
+  document.getElementById('oppName').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function cancelEditOpponent(){
+  editingOpponentId = null;
+  document.getElementById('oppName').value=''; document.getElementById('oppLogo').value='';
+  document.getElementById('oppTier').value='group1';
+  document.getElementById('oppSubmitBtn').textContent = 'Add Opponent';
+  document.getElementById('oppCancelBtn').style.display = 'none';
+}
+async function removeOpponent(id){
+  if(!requireLogin()) return;
+  if(!confirm('Remove this opponent from the database? Past games against them will keep their saved stats, but the opponent name/logo/tier reference will be gone.')) return;
+  const { error } = await sb.from('opponents').delete().eq('id', id);
+  if(error){ alert('Error: '+error.message); return; }
+  await loadOpponents();
+  renderOpponents();
+  populateOpponentSelect();
+}
+function renderOpponents(){
+  const el = document.getElementById('oppList');
+  const editable = !!STATE.session;
+  if(!STATE.opponents.length){ el.innerHTML='<div class="empty">No opponents yet.</div>'; return; }
+  el.innerHTML = STATE.opponents.map(o=>`
+    <div class="team-chip">
+      ${o.logo? `<img src="${o.logo}">` : `<div class="logo-fallback">${o.name.slice(0,2).toUpperCase()}</div>`}
+      <div class="meta"><div class="name">${o.name}</div><div class="tier">${TIER_LABEL[o.tier]}</div></div>
+      ${editable ? `<button class="btn secondary" style="padding:6px 10px;font-size:12px;" onclick="editOpponent('${o.id}')">✎ Edit</button>
+      <button class="btn danger" style="padding:6px 10px;font-size:12px;" onclick="removeOpponent('${o.id}')">Remove</button>` : ''}
+    </div>`).join('');
+}
+
+
+/* ============== NEW GAME TAB ============== */
+function populateOpponentSelect(){
+  const sel = document.getElementById('ngOpponent');
+  sel.innerHTML = STATE.opponents.map(o=>`<option value="${o.id}">${o.name} — ${TIER_LABEL[o.tier]}</option>`).join('') || '<option value="">Add an opponent first</option>';
+}
+async function createGame(){
+  if(!requireLogin()) return;
+  const oppId = document.getElementById('ngOpponent').value;
+  const opp = STATE.opponents.find(o=>o.id===oppId);
+  if(!opp){ alert('Add and select an opponent first (Teams tab).'); return; }
+  const row = {
+    opponent_id: opp.id,
+    competition: document.getElementById('ngComp').value,
+    date: document.getElementById('ngDate').value || null,
+    score_own: Number(document.getElementById('ngScoreHome').value)||0,
+    score_opp: Number(document.getElementById('ngScoreAway').value)||0,
+    own_stats:{}, opp_stats:{}, extra:{}
+  };
+  const { data, error } = await sb.from('games').insert(row).select().single();
+  if(error){ alert('Error creating game: '+error.message); return; }
+  await loadGames();
+  STATE.currentGameId = data.id;
+  renderStatsForm();
+  goTo('stats');
+}
+
+/* ============== STATS ENTRY TAB ============== */
+function currentGame(){ return STATE.games.find(g=>g.id===STATE.currentGameId); }
+function renderStatsForm(){
+  const game = currentGame();
+  const form = document.getElementById('statsForm');
+  if(!game){ form.innerHTML = '<div class="empty">Create a game first (New Game tab).</div>'; document.getElementById('statsTitle').textContent='Enter Match Stats'; return; }
+  const opp = STATE.opponents.find(o=>o.id===game.opponentId);
+  document.getElementById('statsTitle').textContent = `Enter Stats — ${STATE.ownTeam.name} vs ${opp?opp.name:'Opponent'}`;
+  const phases = [['attack','Attacking Phase'],['defend','Defending Phase'],['setpiece','Set Pieces'],['other','Other']];
+  let html='';
+  phases.forEach(([ph,label])=>{
+    const rows = STATS.filter(s=>s.phase===ph);
+    html += `<div class="stat-section"><h3>${label}</h3><div class="stat-head"><div>Statistic</div><div>${STATE.ownTeam.name||'Your Club'}</div><div>${opp?opp.name:'Opponent'}</div></div>`;
+    rows.forEach(s=>{
+      const ov = game.own[s.key] ?? ''; const av = game.opp[s.key] ?? '';
+      html += `<div class="stat-row"><label>${s.label}</label>
+        <input type="number" step="any" data-side="own" data-key="${s.key}" value="${ov}">
+        <input type="number" step="any" data-side="opp" data-key="${s.key}" value="${av}"></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `<div class="stat-section"><h3>Additional (optional)</h3><div class="stat-head"><div>Field</div><div>${STATE.ownTeam.name||'Your Club'}</div><div>${opp?opp.name:'Opponent'}</div></div>`;
+  EXTRA_FIELDS.forEach(f=>{
+    const ov = game.extra[f.key+'_own'] ?? ''; const av = game.extra[f.key+'_opp'] ?? '';
+    html += `<div class="stat-row"><label>${f.label}</label>
+      <input type="number" step="any" data-extra="own" data-key="${f.key}" value="${ov}">
+      <input type="number" step="any" data-extra="opp" data-key="${f.key}" value="${av}"></div>`;
+  });
+  html += `<div class="stat-row"><label>Ball-in-Play Time — Us — time (mm.ss)</label>
+    <input type="number" step="any" id="ballOwn" value="${game.extra.ball_own ?? ''}"><div></div></div>`;
+  html += `<div class="stat-row"><label>Ball-in-Play Time — Neutral — time (mm.ss)</label>
+    <input type="number" step="any" id="ballNeutral" value="${game.extra.ball_neutral ?? ''}"><div></div></div>`;
+  html += `<div class="stat-row"><label>Ball-in-Play Time — Opponent — time (mm.ss)</label>
+    <input type="number" step="any" id="ballOpp" value="${game.extra.ball_opp ?? ''}"><div></div></div>`;
+  html += `</div>`;
+  html += `<div class="stat-section"><h3>Report Images (optional — page 2)</h3>
+    <div class="sub" style="margin-top:-6px;">Upload straight from your computer — one big image, or two side by side.</div>
+    <div class="row">
+      <div>
+        <label>Image 1 (e.g. lineup / squad graphic)</label>
+        <input type="file" accept="image/*" id="reportImg1File" onchange="handleImageUpload(this,1)">
+        <div id="reportImg1Status" style="font-size:12px;color:#888;margin:-6px 0 12px;">${game.extra.image1_url? '✓ Image uploaded':'No image yet'}</div>
+        ${game.extra.image1_url? `<img src="${game.extra.image1_url}" style="max-width:160px;border-radius:8px;margin:-6px 0 12px;display:block;">`:''}
+      </div>
+      <div>
+        <label>Image 2 (optional — leave empty to show only Image 1, full width)</label>
+        <input type="file" accept="image/*" id="reportImg2File" onchange="handleImageUpload(this,2)">
+        <div id="reportImg2Status" style="font-size:12px;color:#888;margin:-6px 0 12px;">${game.extra.image2_url? '✓ Image uploaded':'No image yet'}</div>
+        ${game.extra.image2_url? `<img src="${game.extra.image2_url}" style="max-width:160px;border-radius:8px;margin:-6px 0 12px;display:block;">`:''}
+      </div>
+    </div>
+  </div>`;
+  form.innerHTML = html;
+}
+async function handleImageUpload(input, slot){
+  if(!requireLogin()){ input.value=''; return; }
+  const file = input.files[0];
+  if(!file) return;
+  const game = currentGame();
+  if(!game) return;
+  const statusEl = document.getElementById('reportImg'+slot+'Status');
+  statusEl.textContent = 'Uploading…';
+  const ext = (file.name.split('.').pop()||'jpg').toLowerCase();
+  const path = `${game.id}/image${slot}-${Date.now()}.${ext}`;
+  const { error: upErr } = await sb.storage.from('report-images').upload(path, file, {upsert:true});
+  if(upErr){ statusEl.textContent = 'Upload failed: '+upErr.message; return; }
+  const { data } = sb.storage.from('report-images').getPublicUrl(path);
+  const url = data.publicUrl;
+  game.extra['image'+slot+'_url'] = url;
+  const { error: saveErr } = await sb.from('games').update({ extra: game.extra }).eq('id', game.id);
+  if(saveErr){ statusEl.textContent = 'Saved image but failed to link it: '+saveErr.message; return; }
+  statusEl.textContent = '✓ Image uploaded';
+  renderStatsForm();
+}
+async function saveStats(){
+  if(!requireLogin()) return;
+  const game = currentGame();
+  if(!game) return;
+  document.querySelectorAll('#statsForm input[data-key][data-side]').forEach(inp=>{
+    const target = inp.dataset.side==='own'? game.own : game.opp;
+    target[inp.dataset.key] = inp.value===''? 0 : Number(inp.value);
+  });
+  document.querySelectorAll('#statsForm input[data-extra]').forEach(inp=>{
+    game.extra[inp.dataset.key+'_'+inp.dataset.extra] = inp.value===''? 0 : Number(inp.value);
+  });
+  const bo = document.getElementById('ballOwn');
+  if(bo) game.extra.ball_own = bo.value===''?0:Number(bo.value);
+  const bn = document.getElementById('ballNeutral');
+  if(bn) game.extra.ball_neutral = bn.value===''?0:Number(bn.value);
+  const bp = document.getElementById('ballOpp');
+  if(bp) game.extra.ball_opp = bp.value===''?0:Number(bp.value);
+  const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra }).eq('id', game.id);
+  if(error){ alert('Error saving stats: '+error.message); return; }
+  renderReport(game.id);
+  goTo('report');
+}
+
+/* ============== COMPUTE ENGINE ============== */
+function v(obj,key){ return Number(obj[key])||0; }
+function computeSidePoints(own){
+  const pts = {};
+  STATS.forEach(s=>{
+    if(s.type==='ratioNext'){
+      const a=v(own,s.key), b=v(own,s.next);
+      pts[s.key] = a===0? 0 : (b/a)*s.mult;
+    } else if(s.type==='ratioPrev'){
+      const base=v(own,s.base), self=v(own,s.key);
+      pts[s.key] = base===0? 0 : (self/base)*s.mult;
+    } else {
+      pts[s.key] = v(own,s.key) * (s.points||0);
+    }
+  });
+  return pts;
+}
+function sumPhase(pts, phase){
+  return STATS.filter(s=>s.phase===phase).reduce((sum,s)=>sum+(pts[s.key]||0),0);
+}
+function fmtSec(sec){
+  sec = Math.max(0, Math.round(sec));
+  const m = Math.floor(sec/60), s = sec%60;
+  return m+':' + String(s).padStart(2,'0');
+}
+function fmtDateDMY(dateStr){
+  if(!dateStr) return '';
+  const parts = dateStr.split('-'); // input type=date gives YYYY-MM-DD
+  if(parts.length!==3) return dateStr;
+  const [y,m,d] = parts;
+  return `${d}/${m}/${y}`;
+}
+function computeReport(game){
+  const opp = STATE.opponents.find(o=>o.id===game.opponentId) || {name:'Opponent', tier:'group1', logo:''};
+  const ownPts = computeSidePoints(game.own);
+  const oppPts = computeSidePoints(game.opp);
+
+  const ownAttack = sumPhase(ownPts,'attack'), oppAttack = sumPhase(oppPts,'attack');
+  const ownDefend = sumPhase(ownPts,'defend'), oppDefend = sumPhase(oppPts,'defend');
+  const ownSet = sumPhase(ownPts,'setpiece'), oppSet = sumPhase(oppPts,'setpiece');
+  const ownOther = sumPhase(ownPts,'other'), oppOther = sumPhase(oppPts,'other');
+  const ownTotal = ownAttack+ownDefend+ownSet+ownOther;
+  const oppTotal = oppAttack+oppDefend+oppSet+oppOther;
+
+  const mult = TIER_MULT[opp.tier] ?? 1;
+  const ownWeighted = ownTotal*mult;
+  const oppWeighted = oppTotal; // no multiplier per confirmed logic
+
+  const pct = (a,b)=> (a+b)===0? 0 : Math.round(a/(a+b)*100);
+
+  // possession bar from zone possession %
+  const ownZoneSum = v(game.own,'zone1_poss')+v(game.own,'zone2_poss')+v(game.own,'zone3_poss');
+  const oppZoneSum = v(game.opp,'zone1_poss')+v(game.opp,'zone2_poss')+v(game.opp,'zone3_poss');
+  const possOwn = pct(ownZoneSum, oppZoneSum), possOpp = 100-possOwn;
+
+  // time in thirds (zone seconds) — own side correct mapping, opponent side kept exactly as source spreadsheet (uses press_mid / middle_press_recoveries / ball_recoveries_opp_half)
+  const ownSec = [
+    v(game.own,'zone1_poss')*61,
+    v(game.own,'zone2_poss')*61,
+    v(game.own,'zone3_poss')*61,
+  ];
+  const oppSec = [
+    v(game.opp,'zone1_poss')*61,
+    v(game.opp,'zone2_poss')*61,
+    v(game.opp,'zone3_poss')*61,
+  ];
+
+  return {opp, ownPts, oppPts, ownAttack, oppAttack, ownDefend, oppDefend, ownSet, oppSet,
+    ownTotal, oppTotal, ownWeighted, oppWeighted, mult,
+    pctTotal:[pct(ownTotal,oppTotal), pct(oppTotal,ownTotal)],
+    pctWeighted:[pct(ownWeighted,oppWeighted), pct(oppWeighted,ownWeighted)],
+    possOwn, possOpp, ownSec, oppSec };
+}
+
+/* ============== REPORT RENDER ============== */
+function barLine(label, ownDisplay, oppDisplay, ownScale, oppScale){
+  const max = Math.max(ownScale, oppScale, 1);
+  const wa = Math.min(100, (ownScale/max)*100), wb = Math.min(100,(oppScale/max)*100);
+  return `<div class="stat-line">
+    <div class="stat-line-top"><span>${ownDisplay}</span><span style="font-weight:600;color:var(--ink-dim);font-size:11px;">${label}</span><span>${oppDisplay}</span></div>
+    <div class="stat-line-bar"><div class="a" style="width:${wa/2}%; margin-left:${50-wa/2}%;"></div><div class="b" style="width:${wb/2}%;"></div></div>
+  </div>`;
+}
+function splitBar(leftVal, midVal, rightVal, leftLabel, midLabel, rightLabel){
+  const tot = leftVal+midVal+rightVal || 1;
+  const wl = leftVal/tot*100, wm = midVal/tot*100, wr = rightVal/tot*100;
+  return `<div class="split-chart">
+    <div class="split-bar">
+      <span class="a" style="width:${wl}%;">${leftVal||''}</span>
+      <span class="b" style="width:${wm}%;">${midVal||''}</span>
+      <span class="c" style="width:${wr}%;">${rightVal||''}</span>
+    </div>
+    <div class="split-legend"><span>${leftLabel}</span><span>${midLabel}</span><span>${rightLabel}</span></div>
+  </div>`;
+}
+function renderReport(gameId){
+  const game = STATE.games.find(g=>g.id===gameId);
+  const wrap = document.getElementById('reportWrap');
+  if(!game){ wrap.innerHTML = '<div class="empty">No report yet — create a game and enter stats first.</div>'; return; }
+  const R = computeReport(game);
+  const opp = R.opp;
+  const own = STATE.ownTeam;
+
+  // rows that show ONE number (own vs opp)
+  const single=(label,key)=>({label,
+    ownDisplay:String(v(game.own,key)), oppDisplay:String(v(game.opp,key)),
+    ownScale:v(game.own,key), oppScale:v(game.opp,key)});
+  // rows that show TWO numbers joined by "/" (attempt/success pairs), matching the original report layout
+  const pair=(label,k1,k2)=>{
+    const o1=v(game.own,k1), o2=v(game.own,k2), a1=v(game.opp,k1), a2=v(game.opp,k2);
+    return {label, ownDisplay:`${o1}/${o2}`, oppDisplay:`${a1}/${a2}`, ownScale:o1+o2, oppScale:a1+a2};
+  };
+  const shotsOwn = v(game.own,'harmless_shot')+v(game.own,'dangerous_shot')+v(game.own,'highly_dangerous_shot')+v(game.own,'certain_goal_shot');
+  const shotsOpp = v(game.opp,'harmless_shot')+v(game.opp,'dangerous_shot')+v(game.opp,'highly_dangerous_shot')+v(game.opp,'certain_goal_shot');
+  const chances = (v(game.own,'regular_chance')+v(game.own,'great_chance'));
+  const chancesOpp = (v(game.opp,'regular_chance')+v(game.opp,'great_chance'));
+
+  const attackRows = [
+    single('Progression (Build-up)', 'prog_first'),
+    single('Progression (Middle Third)', 'prog_second'),
+    pair('Counter Attacks / Final 3rd', 'counter_attacks', 'counter_final3rd'),
+    single('Crosses', 'cross'),
+    {label:'Shots', ownDisplay:String(shotsOwn), oppDisplay:String(shotsOpp), ownScale:shotsOwn, oppScale:shotsOpp},
+    {label:'Chances', ownDisplay:String(chances), oppDisplay:String(chancesOpp), ownScale:chances, oppScale:chancesOpp},
+    single('Final 3rd Entries', 'final3rd_entry'),
+    single('Box Entries', 'box_entry'),
+  ];
+  const defendRows = [
+    pair('High Zone / Press', 'high_zone', 'press_high'),
+    single('High Press Recoveries', 'high_press_recoveries'),
+    pair('Mid Zone / Press', 'mid_zone', 'press_mid'),
+    single('Middle Press Recoveries', 'middle_press_recoveries'),
+    single("Ball Recoveries (Opponent's Half)", 'ball_recoveries_opp_half'),
+    pair('Repress / Recoveries', 'repress', 'repress_recoveries'),
+    single('Clearance After Cross', 'clearance_after_cross'),
+    single('Goalkeeper Saves', 'gk_saves'),
+    pair('Trigger Press / Recoveries', 'trigger_press', 'trigger_press_recoveries'),
+  ];
+
+  wrap.innerHTML = `
+  <div class="report-page">
+  <div class="rep-header">
+    <div class="rep-eyebrow">${(game.competition||'MATCH REPORT').toUpperCase()}</div>
+    <div class="rep-teams">
+      <div class="rep-team">
+        ${own.logo? `<img src="${own.logo}">`:`<div class="fallback">${(own.name||'?').slice(0,3).toUpperCase()}</div>`}
+        <div class="tname">${(own.name||'YOUR CLUB').toUpperCase()}</div>
+      </div>
+      <div>
+        <div class="rep-score">${game.scoreHome} – ${game.scoreAway}</div>
+        <div class="rep-date">${fmtDateDMY(game.date)}</div>
+      </div>
+      <div class="rep-team">
+        ${opp.logo? `<img src="${opp.logo}">`:`<div class="fallback">${opp.name.slice(0,3).toUpperCase()}</div>`}
+        <div class="tname">${opp.name.toUpperCase()}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="poss-wrap">
+    <div class="poss-label">BALL POSSESSION</div>
+    <div class="poss-bar">
+      <div class="a" style="width:${R.possOwn}%;">${R.possOwn}%</div>
+      <div class="b" style="width:${R.possOpp}%;">${R.possOpp}%</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="stat-card">
+      <div class="stat-card-head">ATTACKING ACTIONS</div>
+      ${attackRows.map(r=>barLine(r.label, r.ownDisplay, r.oppDisplay, r.ownScale, r.oppScale)).join('')}
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-head">DEFENDING ACTIONS</div>
+      ${defendRows.map(r=>barLine(r.label, r.ownDisplay, r.oppDisplay, r.ownScale, r.oppScale)).join('')}
+    </div>
+  </div>
+
+  <div class="bottom2">
+    <div class="bcard">
+      <div class="lbl">POSSESSION TIME BY PITCH THIRD</div>
+      <div class="thirds-row">
+        <div class="tcol"><div class="n">DEFENSIVE</div><div class="v">${fmtSec(R.ownSec[0])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[0])}</div></div>
+        <div class="tcol"><div class="n">MIDDLE</div><div class="v">${fmtSec(R.ownSec[1])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[1])}</div></div>
+        <div class="tcol"><div class="n">ATTACKING</div><div class="v">${fmtSec(R.ownSec[2])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[2])}</div></div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="lbl">TIME IN POSSESSION</div>
+      <div class="bt-chart">
+        ${(()=>{
+          const ownSec = (game.extra.ball_own||0)*61, neuSec=(game.extra.ball_neutral||0)*61, oppSec=(game.extra.ball_opp||0)*61;
+          const totSec = ownSec+neuSec+oppSec || 1;
+          const hOwn = ownSec/totSec*100, hNeu = neuSec/totSec*100, hOpp = oppSec/totSec*100;
+          return `<div class="bt-col"><div class="val">${fmtSec(ownSec)}</div><div class="bar" style="height:${hOwn}%; background:var(--blue);"></div><div class="name">${(own.name||'CLUB').toUpperCase()}</div></div>
+        <div class="bt-col"><div class="val">${fmtSec(neuSec)}</div><div class="bar" style="height:${hNeu}%; background:var(--gray);"></div><div class="name">OUT OF PLAY</div></div>
+        <div class="bt-col"><div class="val">${fmtSec(oppSec)}</div><div class="bar" style="height:${hOpp}%; background:var(--gold);"></div><div class="name">${opp.name.toUpperCase()}</div></div>`;
+        })()}
+      </div>
+    </div>
+  </div>
+
+  <div class="footbar">
+    <div class="lbl">SET PIECES &amp; ENTRIES</div>
+    <div class="fb-grid">
+      <div class="fb-item"><div class="n">THROW-INS</div><div class="vals"><span class="a">${game.extra.throw_ins_own||0}</span><span class="b">${game.extra.throw_ins_opp||0}</span></div></div>
+      <div class="fb-item"><div class="n">FREE KICKS / CORNERS</div><div class="vals"><span class="a">${game.own.free_kicks||0}/${game.own.corner_kick||0}</span><span class="b">${game.opp.free_kicks||0}/${game.opp.corner_kick||0}</span></div></div>
+    </div>
+    <div class="grid2" style="padding:14px 0 0;">
+      <div>
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${(own.name||'US').toUpperCase()}</div>
+        ${splitBar(game.extra.box_left_own||0, game.extra.box_center_own||0, game.extra.box_right_own||0, 'LEFT','CENTER','RIGHT')}
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${opp.name.toUpperCase()}</div>
+        ${splitBar(game.extra.box_left_opp||0, game.extra.box_center_opp||0, game.extra.box_right_opp||0, 'LEFT','CENTER','RIGHT')}
+      </div>
+      <div>
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">CROSSES R / L — ${(own.name||'US').toUpperCase()}</div>
+        ${splitBar(game.extra.cross_right_own||0, 0, game.extra.cross_left_own||0, 'RIGHT','','LEFT')}
+        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">CROSSES R / L — ${opp.name.toUpperCase()}</div>
+        ${splitBar(game.extra.cross_right_opp||0, 0, game.extra.cross_left_opp||0, 'RIGHT','','LEFT')}
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="report-page">
+  <div class="page-tag">PAGE 2 — INDEX</div>
+  <div class="index-band"><span>ATTACK INDEX</span><span class="vals"><span>${R.ownAttack.toFixed(0)}</span><span>${R.oppAttack.toFixed(0)}</span></span></div>
+  <div class="index-band" style="margin-top:-8px;"><span>DEFENSE INDEX</span><span class="vals"><span>${R.ownDefend.toFixed(0)}</span><span>${R.oppDefend.toFixed(0)}</span></span></div>
+
+  <div class="mq-title">INDEX MATCH QUALITY</div>
+  <div class="mq-grid">
+    <div class="mq-card"><div class="lbl">TOTAL POINTS</div><div class="nums"><span>${R.ownTotal.toFixed(0)}</span><span>${R.oppTotal.toFixed(0)}</span></div></div>
+    <div class="mq-card"><div class="lbl">POINTS (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.ownWeighted.toFixed(0)}</span><span>${R.oppWeighted.toFixed(0)}</span></div></div>
+    <div class="mq-card"><div class="lbl">SHARE %</div><div class="nums"><span>${R.pctTotal[0]}%</span><span>${R.pctTotal[1]}%</span></div></div>
+    <div class="mq-card"><div class="lbl">SHARE % (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.pctWeighted[0]}%</span><span>${R.pctWeighted[1]}%</span></div></div>
+  </div>
+  ${(()=>{
+    const img1 = game.extra.image1_url, img2 = game.extra.image2_url;
+    if(!img1 && !img2) return '';
+    if(img1 && img2){
+      return `<div class="report-images two"><img src="${img1}"><img src="${img2}"></div>`;
+    }
+    return `<div class="report-images one"><img src="${img1||img2}"></div>`;
+  })()}
+  <div class="rep-source">Generated by Match Report Builder</div>
+  </div>
+  `;
+}
+
+/* ============== HISTORY TAB ============== */
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  const editable = !!STATE.session;
+  if(!STATE.games.length){ el.innerHTML='<div class="empty">No saved games yet.</div>'; return; }
+  el.innerHTML = STATE.games.slice().reverse().map(g=>{
+    const opp = STATE.opponents.find(o=>o.id===g.opponentId);
+    return `<div class="history-item">
+      <div style="cursor:pointer; flex:1;" onclick="openGame('${g.id}')">
+        <strong>${STATE.ownTeam.name||'Your Club'} ${g.scoreHome} – ${g.scoreAway} ${opp?opp.name:'?'}</strong>
+        <div style="font-size:12px;color:#888;">${g.date||''} ${g.competition?('· '+g.competition):''}</div>
+      </div>
+      ${editable? `<div style="display:flex; gap:6px;">
+        <button class="btn secondary" style="padding:6px 10px;font-size:12px;" onclick="event.stopPropagation(); editGame('${g.id}')">✎ Edit</button>
+        <button class="btn danger" style="padding:6px 10px;font-size:12px;" onclick="event.stopPropagation(); deleteGame('${g.id}')">🗑 Delete</button>
+      </div>` : '<span class="pill">View only</span>'}
+    </div>`;
+  }).join('');
+}
+function openGame(id){
+  STATE.currentGameId = id;
+  renderReport(id);
+  goTo('report');
+}
+function editGame(id){
+  if(!requireLogin()) return;
+  STATE.currentGameId = id;
+  renderStatsForm();
+  goTo('stats');
+}
+function editCurrentGame(){
+  if(!STATE.currentGameId){ alert('No report open.'); return; }
+  editGame(STATE.currentGameId);
+}
+async function deleteGame(id){
+  if(!requireLogin()) return;
+  const g = STATE.games.find(x=>x.id===id);
+  if(!g) return;
+  const opp = STATE.opponents.find(o=>o.id===g.opponentId);
+  if(!confirm(`Delete this report (${STATE.ownTeam.name||'Your Club'} ${g.scoreHome}-${g.scoreAway} ${opp?opp.name:''})? This only removes the report — the opponent stays in your Teams database.`)) return;
+  const { error } = await sb.from('games').delete().eq('id', id);
+  if(error){ alert('Error deleting: '+error.message); return; }
+  await loadGames();
+  if(STATE.currentGameId===id){
+    STATE.currentGameId = STATE.games.length? STATE.games[STATE.games.length-1].id : null;
+    document.getElementById('reportWrap').innerHTML = '<div class="empty">No report yet — create a game and enter stats first.</div>';
+  }
+  renderHistory();
+}
+function deleteCurrentGame(){
+  if(!STATE.currentGameId){ alert('No report open.'); return; }
+  deleteGame(STATE.currentGameId);
+}
+
+/* ============== OPPONENTS OVERVIEW ============== */
+function renderOpponentsPage(){
+  const wrap = document.getElementById('opponentsWrap');
+  if(!STATE.opponents.length){ wrap.innerHTML = '<div class="empty">No opponents yet — add them in the Teams tab.</div>'; return; }
+  const cards = STATE.opponents.map(o=>{
+    const games = STATE.games.filter(g=>g.opponentId===o.id);
+    let w=0,d=0,l=0, sumOwnW=0, sumOppW=0;
+    games.forEach(g=>{
+      if(g.scoreHome>g.scoreAway) w++; else if(g.scoreHome<g.scoreAway) l++; else d++;
+      const R = computeReport(g);
+      sumOwnW += R.ownWeighted; sumOppW += R.oppWeighted;
+    });
+    const gp = games.length;
+    const avgOwn = gp? (sumOwnW/gp).toFixed(0) : '–';
+    const avgOpp = gp? (sumOppW/gp).toFixed(0) : '–';
+    return `<div class="opp-card">
+      ${o.logo? `<img src="${o.logo}">` : `<div class="fb">${o.name.slice(0,2).toUpperCase()}</div>`}
+      <div class="oname">${o.name}</div>
+      <div class="otier"><span class="tag-tier">${TIER_LABEL[o.tier]}</span></div>
+      <div class="orow"><span>Games Played</span><b>${gp}</b></div>
+      <div class="orow"><span>Record (W-D-L)</span><b>${w}-${d}-${l}</b></div>
+      <div class="orow"><span>Avg Index (Us)</span><b style="color:var(--blue);">${avgOwn}</b></div>
+      <div class="orow"><span>Avg Index (Them)</span><b style="color:var(--gray);">${avgOpp}</b></div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML = `<div class="dark-page">
+    <h2>Opponent Database</h2>
+    <div class="sub2">${STATE.opponents.length} teams · ${STATE.games.length} games recorded</div>
+    <div class="opp-grid">${cards}</div>
+  </div>`;
+}
+
+/* ============== SEASON STATS ============== */
+function buildSeasonChart(points, avgOwn){
+  const W=900, H=220, padL=36, padR=16, padT=16, padB=34;
+  const innerW = W-padL-padR, innerH = H-padT-padB;
+  const maxVal = Math.max(1, ...points.map(p=>Math.max(p.ownW,p.oppW))) * 1.15;
+  const n = points.length;
+  const groupW = innerW/n;
+  const barW = Math.min(22, groupW*0.32);
+  const yFor = val => padT + innerH - (val/maxVal)*innerH;
+  const bars = points.map((p,i)=>{
+    const cx = padL + groupW*i + groupW/2;
+    const yOwn = yFor(p.ownW), yOpp = yFor(p.oppW);
+    const xOwn = cx-barW-2, xOpp = cx+2;
+    return `
+      <rect x="${xOwn}" y="${yOwn}" width="${barW}" height="${padT+innerH-yOwn}" rx="2" fill="var(--blue)"></rect>
+      <rect x="${xOpp}" y="${yOpp}" width="${barW}" height="${padT+innerH-yOpp}" rx="2" fill="var(--gray)"></rect>
+      <text x="${cx}" y="${H-10}" text-anchor="middle" font-size="9" fill="var(--ink-dim)">${p.label}</text>`;
+  }).join('');
+  const yAvg = yFor(avgOwn);
+  const gridLines = [0,0.25,0.5,0.75,1].map(f=>{
+    const y = padT+innerH-innerH*f;
+    const val = Math.round(maxVal*f);
+    return `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--navy-700)" stroke-width="1"></line>
+            <text x="${padL-6}" y="${y+3}" text-anchor="end" font-size="9" fill="var(--ink-dim)">${val}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%; height:auto; display:block;">
+    ${gridLines}
+    <line x1="${padL}" y1="${yAvg}" x2="${W-padR}" y2="${yAvg}" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="5,4"></line>
+    <text x="${W-padR}" y="${yAvg-5}" text-anchor="end" font-size="9" fill="var(--gold)">Season Avg (Us): ${avgOwn.toFixed(0)}</text>
+    ${bars}
+  </svg>`;
+}
+function renderSeasonStats(){
+  const wrap = document.getElementById('seasonWrap');
+  if(!STATE.games.length){ wrap.innerHTML = '<div class="empty">No games played yet.</div>'; return; }
+  const sorted = STATE.games.slice().sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+  let sums = {ownTotal:0, oppTotal:0, ownWeighted:0, oppWeighted:0, pct:0};
+  const chartPoints = [];
+  const rows = sorted.map(g=>{
+    const opp = STATE.opponents.find(o=>o.id===g.opponentId);
+    const R = computeReport(g);
+    sums.ownTotal += R.ownTotal; sums.oppTotal += R.oppTotal;
+    sums.ownWeighted += R.ownWeighted; sums.oppWeighted += R.oppWeighted;
+    sums.pct += R.pctWeighted[0];
+    chartPoints.push({label:(opp?opp.name.slice(0,3):'?').toUpperCase(), ownW:R.ownWeighted, oppW:R.oppWeighted});
+    return `<tr>
+      <td>${g.date||'–'}</td>
+      <td>${opp? opp.name:'?'} <span style="color:var(--ink-dim);font-size:11px;">(${g.scoreHome}-${g.scoreAway})</span></td>
+      <td style="color:var(--blue);font-weight:700;">${R.ownTotal.toFixed(0)}</td>
+      <td style="color:var(--gray);">${R.oppTotal.toFixed(0)}</td>
+      <td style="color:var(--blue);font-weight:700;">${R.ownWeighted.toFixed(0)}</td>
+      <td style="color:var(--gray);">${R.oppWeighted.toFixed(0)}</td>
+      <td>${R.pctWeighted[0]}%</td>
+    </tr>`;
+  }).join('');
+  const n = sorted.length;
+  const avgOwnWeighted = sums.ownWeighted/n;
+  const avgRow = `<tr class="avg-row">
+      <td colspan="2">SEASON AVERAGE (${n} games)</td>
+      <td>${(sums.ownTotal/n).toFixed(1)}</td>
+      <td style="color:var(--gray);">${(sums.oppTotal/n).toFixed(1)}</td>
+      <td>${avgOwnWeighted.toFixed(1)}</td>
+      <td style="color:var(--gray);">${(sums.oppWeighted/n).toFixed(1)}</td>
+      <td>${(sums.pct/n).toFixed(1)}%</td>
+    </tr>`;
+  wrap.innerHTML = `<div class="dark-page">
+    <h2>Season Stats</h2>
+    <div class="sub2">Index &amp; weighted index across all recorded games, with season averages.</div>
+    <div class="bcard" style="margin-bottom:18px;">
+      <div class="lbl">WEIGHTED INDEX PER GAME <span style="color:var(--blue);">■ Us</span> &nbsp; <span style="color:var(--gray);">■ Opponent</span></div>
+      ${buildSeasonChart(chartPoints, avgOwnWeighted)}
+    </div>
+    <table class="szn">
+      <thead><tr><th>Date</th><th>Opponent</th><th>Total (Us)</th><th>Total (Them)</th><th>Weighted (Us)</th><th>Weighted (Them)</th><th>Share %</th></tr></thead>
+      <tbody>${rows}${avgRow}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ============== EXPORT: PDF (print, light theme) & JPEG ============== */
+function exportPDF(elId){
+  const el = document.getElementById(elId);
+  el.classList.add('export-light');
+  window.print();
+  setTimeout(()=> el.classList.remove('export-light'), 500);
+}
+function exportImage(elId, filename){
+  const el = document.getElementById(elId);
+  el.classList.add('export-light');
+  html2canvas(el, {backgroundColor:'#ffffff', scale:2}).then(canvas=>{
+    el.classList.remove('export-light');
+    const link = document.createElement('a');
+    link.download = `${filename}-${new Date().toISOString().slice(0,10)}.jpg`;
+    link.href = canvas.toDataURL('image/jpeg', 0.95);
+    link.click();
+  }).catch(err=>{
+    el.classList.remove('export-light');
+    alert('Image export failed: '+err.message);
+  });
+}
+
+/* ============== BACKUP / ARCHIVE ============== */
+function exportBackup(){
+  const data = { ownTeam:STATE.ownTeam, opponents:STATE.opponents, games:STATE.games, exportedAt:new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `match-report-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function importBackupFile(input){
+  if(!requireLogin()){ input.value=''; return; }
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e)=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.games && !data.opponents) throw new Error('bad file');
+      if(!confirm('This will ADD all teams and games from this backup file into the shared database (existing data is kept, not overwritten). Continue?')) { input.value=''; return; }
+      if(data.ownTeam){
+        await sb.from('club_profile').upsert({ id:'main', name:data.ownTeam.name||'My Club', logo_url:data.ownTeam.logo||'' });
+      }
+      const idMap = {};
+      for(const o of (data.opponents||[])){
+        const { data:row, error } = await sb.from('opponents').insert({name:o.name, logo_url:o.logo||'', tier:o.tier||'group1'}).select().single();
+        if(!error) idMap[o.id] = row.id;
+      }
+      for(const g of (data.games||[])){
+        await sb.from('games').insert({
+          opponent_id: idMap[g.opponentId] || null,
+          date: g.date || null, competition: g.competition||'',
+          score_own: g.scoreHome||0, score_opp: g.scoreAway||0,
+          own_stats: g.own||{}, opp_stats: g.opp||{}, extra: g.extra||{}
+        });
+      }
+      await loadClubProfile(); await loadOpponents(); await loadGames();
+      document.getElementById('ownName').value = STATE.ownTeam.name||'';
+      document.getElementById('ownLogo').value = STATE.ownTeam.logo||'';
+      renderClubPreview();
+      renderOpponents(); populateOpponentSelect(); renderHistory();
+      alert('Backup imported successfully.');
+    }catch(err){ alert('This file is not a valid backup, or an error occurred: '+err.message); }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+/* ============== AUTH ============== */
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function renderClubPreview(){
+  const el = document.getElementById('clubPreview');
+  const t = STATE.ownTeam;
+  if(!t || !t.name){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML = `
+    ${t.logo? `<img src="${t.logo}">` : `<div class="logo-fallback">${t.name.slice(0,2).toUpperCase()}</div>`}
+    <div class="meta"><div class="name">${t.name}</div><div class="tier">Your Club</div></div>`;
+}
+function refreshAuthUI(){
+  const loggedIn = !!STATE.session;
+  document.getElementById('loginBtn').textContent = loggedIn ? ('Log out ('+(STATE.session.user.email||'')+')') : 'Log in';
+  document.getElementById('clubEditRow').style.display = loggedIn ? 'block':'none';
+  document.getElementById('clubViewOnly').style.display = loggedIn ? 'none':'block';
+  document.getElementById('oppAddForm').style.display = loggedIn ? 'block':'none';
+  document.getElementById('oppViewOnly').style.display = loggedIn ? 'none':'block';
+  renderOpponents();
+  renderHistory();
+}
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  if(!CONFIGURED){ alert('Connect Supabase first (see SUPABASE_URL/SUPABASE_ANON_KEY at the top of the script).'); return; }
+  if(STATE.session){
+    await sb.auth.signOut();
+  } else {
+    document.getElementById('loginError').textContent = '';
+    openModal('loginModal');
+  }
+});
+document.getElementById('loginSubmit').addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if(!email || !password){ document.getElementById('loginError').textContent = 'Enter your email and password.'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){ document.getElementById('loginError').textContent = 'Incorrect email or password.'; return; }
+  closeModal('loginModal');
+});
+
+/* ============== INIT ============== */
+async function init(){
+  if(!CONFIGURED){
+    document.getElementById('connLabel').textContent = 'Not connected to Supabase';
+    document.getElementById('reportWrap').innerHTML = `<div class="empty">This app isn't connected to Supabase yet.<br>Open this file, find <code>SUPABASE_URL</code> / <code>SUPABASE_ANON_KEY</code> near the top of the &lt;script&gt; tag, and fill in your own values from Supabase Project Settings → API. Then run schema.sql once in the Supabase SQL Editor.</div>`;
+    return;
+  }
+  try{
+    await loadClubProfile();
+    await loadOpponents();
+    await loadGames();
+    document.getElementById('connLabel').textContent = 'Connected';
+  }catch(e){
+    console.error(e);
+    document.getElementById('connLabel').textContent = 'Connection error';
+    return;
+  }
+  document.getElementById('ownName').value = STATE.ownTeam.name||'';
+  document.getElementById('ownLogo').value = STATE.ownTeam.logo||'';
+  renderClubPreview();
+  populateOpponentSelect();
+  if(STATE.games.length){
+    STATE.currentGameId = STATE.games[STATE.games.length-1].id;
+  }
+  const { data:{ session } } = await sb.auth.getSession();
+  STATE.session = session;
+  refreshAuthUI();
+  sb.auth.onAuthStateChange((_event, session)=>{
+    STATE.session = session;
+    refreshAuthUI();
+  });
+}
+init();
+</script>
+</body>
+</html>
