@@ -869,8 +869,8 @@ function renderReport(gameId){
   };
   const shotsOwn = v(game.own,'harmless_shot')+v(game.own,'dangerous_shot')+v(game.own,'highly_dangerous_shot')+v(game.own,'certain_goal_shot')+v(game.own,'goal')+v(game.own,'goal_ca');
   const shotsOpp = v(game.opp,'harmless_shot')+v(game.opp,'dangerous_shot')+v(game.opp,'highly_dangerous_shot')+v(game.opp,'certain_goal_shot')+v(game.opp,'goal')+v(game.opp,'goal_ca');
-  const chances = (v(game.own,'regular_chance')+v(game.own,'great_chance'));
-  const chancesOpp = (v(game.opp,'regular_chance')+v(game.opp,'great_chance'));
+  const chances = (v(game.own,'regular_chance')+v(game.own,'great_chance')+v(game.own,'goal')+v(game.own,'goal_ca')+v(game.own,'highly_dangerous_shot')+v(game.own,'certain_goal_shot'));
+  const chancesOpp = (v(game.opp,'regular_chance')+v(game.opp,'great_chance')+v(game.opp,'goal')+v(game.opp,'goal_ca')+v(game.opp,'highly_dangerous_shot')+v(game.opp,'certain_goal_shot'));
 
   const attackRows = [
     single('Progression (Build-up)', 'prog_first'),
