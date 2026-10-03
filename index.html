@@ -111,6 +111,19 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
 .stat-line-bar{display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--navy-700);}
 .stat-line-bar .a{background:var(--blue);}
 .stat-line-bar .b{background:var(--gray);}
+
+.chart-legend{display:flex; gap:16px; padding:4px 16px 2px; font-size:9.5px; font-weight:700; letter-spacing:.03em;}
+.chart-legend span{display:flex; align-items:center; gap:5px;}
+.chart-legend .dot{width:7px; height:7px; border-radius:2px; display:inline-block;}
+.chart-row{padding:1.5px 16px;}
+.chart-row-top{font-size:10.5px; font-weight:600; color:var(--ink-dim); margin-bottom:1px; letter-spacing:.01em;}
+.chart-bar-track{display:flex; align-items:center; height:11px; gap:6px;}
+.chart-bar-track .track-bg{flex:1; height:8px; display:flex; border-radius:3px; overflow:hidden; background:var(--navy-700);}
+.chart-bar-track .track-fill.own{background:var(--blue);}
+.chart-bar-track .track-fill.opp{background:var(--gray);}
+.chart-bar-track .track-val{width:22px; font-size:10.5px; font-weight:700;}
+.chart-bar-track .track-val.own{text-align:right;}
+.chart-bar-track .track-val.opp{text-align:left; color:var(--ink-dim); font-weight:600;}
 .index-band{margin:0 28px 16px; background:var(--navy-700); border-radius:10px; padding:16px 22px; display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:18px; letter-spacing:.05em;}
 .index-band .vals{display:flex; gap:14px; font-size:20px;}
 .index-band .vals span:first-child{color:var(--blue);}
@@ -173,6 +186,13 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
   .stat-line{ padding:1.5px 12px !important; }
   .stat-line-top{ margin-bottom:0 !important; font-size:10px !important; }
   .stat-line-bar{ height:4px !important; }
+  .chart-legend{ padding:1px 12px 1px !important; font-size:8px !important; gap:8px !important; }
+  .chart-legend .dot{ width:5px !important; height:5px !important; }
+  .chart-row{ padding:0.5px 12px !important; }
+  .chart-row-top{ font-size:8px !important; margin-bottom:0 !important; }
+  .chart-bar-track{ height:6px !important; gap:3px !important; }
+  .chart-bar-track .track-bg{ height:4px !important; }
+  .chart-bar-track .track-val{ width:16px !important; font-size:8px !important; }
   .bottom2{ padding:0 20px 6px !important; gap:10px !important; }
   .bcard{ padding:6px 12px !important; }
   .bcard .lbl{ margin-bottom:4px !important; }
@@ -240,6 +260,11 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 .export-light .stat-line-bar{ background:#E3E7ED !important; }
 .export-light .stat-line-bar .a{ background:#1C56C7 !important; }
 .export-light .stat-line-bar .b{ background:#94A0AC !important; }
+.export-light .chart-bar-track .track-bg{ background:#E3E7ED !important; }
+.export-light .chart-bar-track .track-fill.own{ background:#1C56C7 !important; }
+.export-light .chart-bar-track .track-fill.opp{ background:#94A0AC !important; }
+.export-light .chart-row-top{ color:#5b6b7c !important; }
+.export-light .chart-bar-track .track-val.opp{ color:#5b6b7c !important; }
 .export-light .index-band{ background:#E6EDFB !important; color:#0A1F3D !important; }
 .export-light .index-band .vals span:first-child{ color:#1C56C7 !important; }
 .export-light .index-band .vals span:last-child{ color:#94A0AC !important; }
@@ -648,7 +673,13 @@ function renderStatsForm(){
   const opp = STATE.opponents.find(o=>o.id===game.opponentId);
   document.getElementById('statsTitle').textContent = `Enter Stats — ${STATE.ownTeam.name} vs ${opp?opp.name:'Opponent'}`;
   let html='';
+  html += `<div class="stat-section"><h3>Uvoz iz Nacsporta</h3>
+    <div class="sub" style="margin-top:-6px;">Ubaci .xml fajl iz Nacsporta — automatski popuni polja ispod. Uvek proveri brojeve pre snimanja (par polja se procenjuje).</div>
+    <input type="file" accept=".xml" id="nacsportFile" onchange="importNacsportXML(this)">
+    <div id="nacsportStatus" style="font-size:12px;color:#888;margin-top:6px;"></div>
+  </div>`;
   html += `<div class="stat-section"><h3>Match Score</h3>
+
     <div class="row">
       <div><label>${STATE.ownTeam.name||'Your Club'} — goals</label><input type="number" id="editScoreHome" value="${game.scoreHome}"></div>
       <div><label>${opp?opp.name:'Opponent'} — goals</label><input type="number" id="editScoreAway" value="${game.scoreAway}"></div>
@@ -699,6 +730,170 @@ function renderStatsForm(){
     </div>
   </div>`;
   form.innerHTML = html;
+}
+/* ============== NACSPORT XML IMPORT ============== */
+function parseNacsportInstances(xmlText){
+  const dp = new DOMParser();
+  const doc = dp.parseFromString(xmlText, 'text/xml');
+  const nodes = Array.from(doc.getElementsByTagName('instance'));
+  return nodes.map(n=>{
+    const code = n.getElementsByTagName('code')[0]?.textContent || '';
+    const start = parseFloat(n.getElementsByTagName('start')[0]?.textContent || '0');
+    const end = parseFloat(n.getElementsByTagName('end')[0]?.textContent || '0');
+    const labels = Array.from(n.getElementsByTagName('label')).map(l=>l.getElementsByTagName('text')[0]?.textContent || '');
+    return {code, start, end, labels};
+  });
+}
+function countLabel(instances, code, label){
+  return instances.filter(i=>i.code===code && i.labels.includes(label)).length;
+}
+function countLabels(instances, code, labels){
+  return instances.filter(i=>i.code===code && labels.every(l=>i.labels.includes(l))).length;
+}
+function countGoal(instances, code, counterAttack, goalLabel){
+  goalLabel = goalLabel || 'GOAL';
+  return instances.filter(i=>i.code===code && i.labels.includes(goalLabel) && i.labels.includes('Counter')===counterAttack).length;
+}
+function secToMMSS(totalSec){
+  totalSec = Math.max(0, Math.round(totalSec));
+  const m = Math.floor(totalSec/60), s = totalSec%60;
+  return Number(m + '.' + String(s).padStart(2,'0'));
+}
+function sumDuration(instances, code){
+  return instances.filter(i=>i.code===code).reduce((a,i)=>a+(i.end-i.start),0);
+}
+function buildStatsFromNacsport(instances){
+  const own = {}, opp = {}, extra = {};
+
+  own.goal = countGoal(instances,'Attack',false,'GOAL');
+  own.goal_ca = countGoal(instances,'Attack',true,'GOAL');
+  opp.goal = countGoal(instances,'Defense',false,'GOAL Opp');
+  opp.goal_ca = countGoal(instances,'Defense',true,'GOAL Opp');
+
+  own.harmless_shot = countLabel(instances,'Attack','shot1');
+  own.dangerous_shot = countLabel(instances,'Attack','shot2');
+  own.highly_dangerous_shot = countLabel(instances,'Attack','shot3');
+  own.certain_goal_shot = countLabel(instances,'Attack','shot4');
+  opp.harmless_shot = countLabel(instances,'Defense','shot1');
+  opp.dangerous_shot = countLabel(instances,'Defense','shot2');
+  opp.highly_dangerous_shot = countLabel(instances,'Defense','shot3');
+  opp.certain_goal_shot = countLabel(instances,'Defense','shot4');
+
+  own.regular_chance = countLabel(instances,'Attack','C1');
+  own.great_chance = countLabel(instances,'Attack','C2');
+  opp.regular_chance = countLabel(instances,'Defense','C1');
+  opp.great_chance = countLabel(instances,'Defense','C2');
+
+  own.prog_first = countLabel(instances,'Build up','Progressive pass');
+  own.prog_second = countLabel(instances,'2nd Zone','Progressive pass');
+  opp.prog_first = countLabel(instances,'Opp Build up','Progressive pass');
+  opp.prog_second = countLabel(instances,'OPP 2nd Zone','Progressive pass');
+
+  own.counter_attacks = countLabel(instances,'Attack','Counter');
+  opp.counter_attacks = countLabel(instances,'Defense','Counter');
+
+  const ownCrossR = countLabel(instances,'Attack','Cross R');
+  const ownCrossL = countLabel(instances,'Attack','Cross L');
+  own.cross = ownCrossR + ownCrossL;
+  const oppCrossR = countLabel(instances,'Defense','Cross R');
+  const oppCrossL = countLabel(instances,'Defense','Cross L');
+  opp.cross = oppCrossR + oppCrossL;
+  extra.cross_right_own = ownCrossR; extra.cross_left_own = ownCrossL;
+  extra.cross_right_opp = oppCrossR; extra.cross_left_opp = oppCrossL;
+
+  own.final3rd_entry = instances.filter(i=>i.code==='Att 3rd').length;
+  opp.final3rd_entry = instances.filter(i=>i.code==='OPP Att 3rd').length;
+  extra.box_left_own = countLabel(instances,'Att 3rd','Left');
+  extra.box_center_own = countLabel(instances,'Att 3rd','Central');
+  extra.box_right_own = countLabel(instances,'Att 3rd','Right');
+  extra.box_left_opp = countLabel(instances,'OPP Att 3rd','Left');
+  extra.box_center_opp = countLabel(instances,'OPP Att 3rd','Central');
+  extra.box_right_opp = countLabel(instances,'OPP Att 3rd','Right');
+
+  own.box_entry = countLabel(instances,'Attack','BOX Entry');
+  opp.box_entry = countLabel(instances,'Defense','BOX Entry');
+
+  own.high_zone = countLabel(instances,'Defense','High Zone');
+  own.press_high = countLabels(instances,'Defense',['High Zone','PRESS']);
+  own.high_press_recoveries = countLabels(instances,'Defense',['High Zone','RECOVERIES']);
+  opp.high_zone = countLabel(instances,'Attack','High Zone Opp');
+  opp.press_high = countLabels(instances,'Attack',['High Zone Opp','PRESS']);
+  opp.high_press_recoveries = countLabels(instances,'Attack',['High Zone Opp','RECOVERIES']);
+
+  own.mid_zone = countLabel(instances,'Defense','Mid Zone');
+  own.press_mid = countLabels(instances,'Defense',['Mid Zone','PRESS']);
+  own.middle_press_recoveries = countLabels(instances,'Defense',['Mid Zone','RECOVERIES']);
+  opp.mid_zone = countLabel(instances,'Attack','Mid Zone Opp');
+  opp.press_mid = countLabels(instances,'Attack',['Mid Zone Opp','PRESS']);
+  opp.middle_press_recoveries = countLabels(instances,'Attack',['Mid Zone Opp','RECOVERIES']);
+
+  own.ball_recoveries_opp_half = countLabel(instances,'Defense','RECOVERIES');
+  opp.ball_recoveries_opp_half = countLabel(instances,'Attack','RECOVERIES');
+
+  own.repress = countLabel(instances,'Defense','RE-PRESS');
+  opp.repress = countLabel(instances,'Attack','RE-PRESS');
+
+  own.gk_saves = countLabel(instances,'Defense','GK Saves');
+  opp.gk_saves = countLabel(instances,'Attack','GK Saves');
+
+  own.clearance_after_cross = countLabel(instances,'Defense','Clearance after a cross');
+  opp.clearance_after_cross = countLabel(instances,'Attack','Clearance after a cross');
+
+  own.trigger_press = countLabel(instances,'Defense','Triggers');
+  opp.trigger_press = countLabel(instances,'Attack','Triggers');
+
+  own.free_kicks = countLabel(instances,'Attack','free kick') + countLabel(instances,'Attack','direct free kick');
+  opp.free_kicks = countLabel(instances,'Defense','free kick') + countLabel(instances,'Defense','direct free kick');
+  own.corner_kick = countLabel(instances,'Attack','corner kick');
+  opp.corner_kick = countLabel(instances,'Defense','corner kick');
+
+  extra.throw_ins_own = countLabel(instances,'Attack','throw in');
+  extra.throw_ins_opp = countLabel(instances,'Defense','throw in');
+
+  own.zone1_poss = secToMMSS(sumDuration(instances,'Build up'));
+  own.zone2_poss = secToMMSS(sumDuration(instances,'2nd Zone'));
+  own.zone3_poss = secToMMSS(sumDuration(instances,'Att 3rd'));
+  opp.zone1_poss = secToMMSS(sumDuration(instances,'OPP Att 3rd'));
+  opp.zone2_poss = secToMMSS(sumDuration(instances,'OPP 2nd Zone'));
+  opp.zone3_poss = secToMMSS(sumDuration(instances,'Opp Build up'));
+
+  const ownPossSec = sumDuration(instances,'Build up')+sumDuration(instances,'2nd Zone')+sumDuration(instances,'Att 3rd');
+  const oppPossSec = sumDuration(instances,'Opp Build up')+sumDuration(instances,'OPP 2nd Zone')+sumDuration(instances,'OPP Att 3rd');
+  const outOfPlaySec = sumDuration(instances,'Out of Play');
+  extra.ball_own = secToMMSS(ownPossSec);
+  extra.ball_opp = secToMMSS(oppPossSec);
+  extra.ball_neutral = secToMMSS(outOfPlaySec);
+
+  const scoreHome = own.goal + own.goal_ca;
+  const scoreAway = opp.goal + opp.goal_ca;
+
+  return {own, opp, extra, scoreHome, scoreAway};
+}
+function importNacsportXML(input){
+  const file = input.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('nacsportStatus');
+  statusEl.textContent = 'Čitam fajl…';
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const instances = parseNacsportInstances(e.target.result);
+      if(instances.length===0){ statusEl.textContent = 'Nisam pronašao <instance> elemente — da li je ovo Nacsport XML fajl?'; return; }
+      const result = buildStatsFromNacsport(instances);
+      const game = currentGame();
+      if(!game){ statusEl.textContent = 'Prvo napravi meč (New Game).'; return; }
+      Object.assign(game.own, result.own);
+      Object.assign(game.opp, result.opp);
+      Object.assign(game.extra, result.extra);
+      game.scoreHome = result.scoreHome;
+      game.scoreAway = result.scoreAway;
+      renderStatsForm();
+      statusEl.textContent = `✓ Uvezeno iz ${file.name} (${instances.length} instanci). Proveri brojeve pa klikni Save.`;
+    }catch(err){
+      statusEl.textContent = 'Greška pri parsiranju: '+err.message;
+    }
+  };
+  reader.readAsText(file);
 }
 async function handleImageUpload(input, slot){
   if(!requireLogin()){ input.value=''; return; }
@@ -850,6 +1045,25 @@ function splitBar(leftVal, midVal, rightVal, leftLabel, midLabel, rightLabel){
     <div class="split-legend"><span>${leftLabel}</span><span>${midLabel}</span><span>${rightLabel}</span></div>
   </div>`;
 }
+function renderStatChart(ownName, oppName, rows){
+  return `<div class="chart-legend">
+      <span><span class="dot" style="background:var(--blue);"></span>${(ownName||'US').toUpperCase()}</span>
+      <span><span class="dot" style="background:var(--gray);"></span>${(oppName||'OPPONENT').toUpperCase()}</span>
+    </div>` +
+    rows.map(r=>{
+      const total = Math.max(0.0001, r.ownScale + r.oppScale);
+      const ownPct = Math.max(4, r.ownScale/total*100);
+      const oppPct = Math.max(4, 100-ownPct);
+      return `<div class="chart-row">
+        <div class="chart-row-top"><span>${r.label}</span></div>
+        <div class="chart-bar-track">
+          <div class="track-val own">${r.ownDisplay}</div>
+          <div class="track-bg"><div class="track-fill own" style="width:${ownPct}%;"></div><div class="track-fill opp" style="width:${oppPct}%;"></div></div>
+          <div class="track-val opp">${r.oppDisplay}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
 function renderReport(gameId){
   const game = STATE.games.find(g=>g.id===gameId);
   const wrap = document.getElementById('reportWrap');
@@ -925,22 +1139,22 @@ function renderReport(gameId){
   <div class="grid2">
     <div class="stat-card">
       <div class="stat-card-head">ATTACKING ACTIONS</div>
-      ${attackRows.map(r=>barLine(r.label, r.ownDisplay, r.oppDisplay, r.ownScale, r.oppScale)).join('')}
+      ${renderStatChart(own.name, opp.name, attackRows)}
     </div>
     <div class="stat-card">
       <div class="stat-card-head">DEFENDING ACTIONS</div>
-      ${defendRows.map(r=>barLine(r.label, r.ownDisplay, r.oppDisplay, r.ownScale, r.oppScale)).join('')}
+      ${renderStatChart(own.name, opp.name, defendRows)}
     </div>
   </div>
 
   <div class="bottom2">
     <div class="bcard">
       <div class="lbl">POSSESSION TIME BY PITCH THIRD</div>
-      <div class="thirds-row">
-        <div class="tcol"><div class="n">DEFENSIVE</div><div class="v">${fmtSec(R.ownSec[0])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[0])}</div></div>
-        <div class="tcol"><div class="n">MIDDLE</div><div class="v">${fmtSec(R.ownSec[1])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[1])}</div></div>
-        <div class="tcol"><div class="n">ATTACKING</div><div class="v">${fmtSec(R.ownSec[2])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[2])}</div></div>
-      </div>
+      ${renderStatChart(own.name, opp.name, [
+        {label:'DEFENSIVE', ownDisplay:fmtSec(R.ownSec[0]), oppDisplay:fmtSec(R.oppSec[0]), ownScale:R.ownSec[0], oppScale:R.oppSec[0]},
+        {label:'MIDDLE', ownDisplay:fmtSec(R.ownSec[1]), oppDisplay:fmtSec(R.oppSec[1]), ownScale:R.ownSec[1], oppScale:R.oppSec[1]},
+        {label:'ATTACKING', ownDisplay:fmtSec(R.ownSec[2]), oppDisplay:fmtSec(R.oppSec[2]), ownScale:R.ownSec[2], oppScale:R.oppSec[2]},
+      ])}
     </div>
     <div class="bcard">
       <div class="lbl">TIME IN POSSESSION</div>
@@ -959,10 +1173,10 @@ function renderReport(gameId){
 
   <div class="footbar">
     <div class="lbl">SET PIECES &amp; ENTRIES</div>
-    <div class="fb-grid">
-      <div class="fb-item"><div class="n">THROW-INS</div><div class="vals"><span class="a">${game.extra.throw_ins_own||0}</span><span class="b">${game.extra.throw_ins_opp||0}</span></div></div>
-      <div class="fb-item"><div class="n">FREE KICKS / CORNERS</div><div class="vals"><span class="a">${game.own.free_kicks||0}/${game.own.corner_kick||0}</span><span class="b">${game.opp.free_kicks||0}/${game.opp.corner_kick||0}</span></div></div>
-    </div>
+    ${renderStatChart(own.name, opp.name, [
+      {label:'THROW-INS', ownDisplay:String(game.extra.throw_ins_own||0), oppDisplay:String(game.extra.throw_ins_opp||0), ownScale:game.extra.throw_ins_own||0, oppScale:game.extra.throw_ins_opp||0},
+      {label:'FREE KICKS / CORNERS', ownDisplay:`${game.own.free_kicks||0}/${game.own.corner_kick||0}`, oppDisplay:`${game.opp.free_kicks||0}/${game.opp.corner_kick||0}`, ownScale:(game.own.free_kicks||0)+(game.own.corner_kick||0), oppScale:(game.opp.free_kicks||0)+(game.opp.corner_kick||0)},
+    ])}
     <div class="grid2" style="padding:14px 0 0;">
       <div>
         <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${(own.name||'US').toUpperCase()}</div>
