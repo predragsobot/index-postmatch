@@ -111,19 +111,6 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
 .stat-line-bar{display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--navy-700);}
 .stat-line-bar .a{background:var(--blue);}
 .stat-line-bar .b{background:var(--gray);}
-
-.chart-legend{display:flex; gap:16px; padding:4px 16px 2px; font-size:9.5px; font-weight:700; letter-spacing:.03em;}
-.chart-legend span{display:flex; align-items:center; gap:5px;}
-.chart-legend .dot{width:7px; height:7px; border-radius:2px; display:inline-block;}
-.chart-row{padding:1.5px 16px;}
-.chart-row-top{font-size:10.5px; font-weight:600; color:var(--ink-dim); margin-bottom:1px; letter-spacing:.01em;}
-.chart-bar-track{display:flex; align-items:center; height:11px; gap:6px;}
-.chart-bar-track .track-bg{flex:1; height:8px; display:flex; border-radius:3px; overflow:hidden; background:var(--navy-700);}
-.chart-bar-track .track-fill.own{background:var(--blue);}
-.chart-bar-track .track-fill.opp{background:var(--gray);}
-.chart-bar-track .track-val{width:22px; font-size:10.5px; font-weight:700;}
-.chart-bar-track .track-val.own{text-align:right;}
-.chart-bar-track .track-val.opp{text-align:left; color:var(--ink-dim); font-weight:600;}
 .index-band{margin:0 28px 16px; background:var(--navy-700); border-radius:10px; padding:16px 22px; display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:18px; letter-spacing:.05em;}
 .index-band .vals{display:flex; gap:14px; font-size:20px;}
 .index-band .vals span:first-child{color:var(--blue);}
@@ -186,13 +173,6 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
   .stat-line{ padding:1.5px 12px !important; }
   .stat-line-top{ margin-bottom:0 !important; font-size:10px !important; }
   .stat-line-bar{ height:4px !important; }
-  .chart-legend{ padding:1px 12px 1px !important; font-size:8px !important; gap:8px !important; }
-  .chart-legend .dot{ width:5px !important; height:5px !important; }
-  .chart-row{ padding:0.5px 12px !important; }
-  .chart-row-top{ font-size:8px !important; margin-bottom:0 !important; }
-  .chart-bar-track{ height:6px !important; gap:3px !important; }
-  .chart-bar-track .track-bg{ height:4px !important; }
-  .chart-bar-track .track-val{ width:16px !important; font-size:8px !important; }
   .bottom2{ padding:0 20px 6px !important; gap:10px !important; }
   .bcard{ padding:6px 12px !important; }
   .bcard .lbl{ margin-bottom:4px !important; }
@@ -237,6 +217,60 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 .modal-head h3{margin:0; font-size:16px;}
 .modal-close{background:none; border:none; font-size:20px; cursor:pointer; color:#888;}
 
+/* ---------- REPORT v2 (sectioned layout, same dark palette) ---------- */
+#reportWrap{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+.nr{padding:18px 22px 8px;}
+.nr .ca{color:var(--blue);} .nr .cb{color:var(--ink-dim);} .nr .cg{color:var(--gray);}
+.nr-head{padding:10px 4px 18px;}
+.nr-eyebrow{font-size:13px; letter-spacing:.15em; color:var(--ink-dim); font-weight:700; margin-bottom:12px;}
+.nr-id{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin-top:18px;}
+.nr-f{background:var(--navy-700); border-radius:8px; padding:8px 10px; font-size:13px; font-weight:600;}
+.nr-f span{display:block; font-size:10px; letter-spacing:.12em; color:var(--ink-dim); text-transform:uppercase; font-weight:600;}
+.nr-card{background:var(--navy-800); border-radius:12px; padding:16px 18px; margin-bottom:14px; break-inside:avoid;}
+.nr-card h3{margin:0 0 12px; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink);}
+.nr-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+.nr-grid .nr-card{margin-bottom:0;}
+.nr-card .nr-grid{margin-bottom:0;}
+@media(max-width:720px){.nr-grid{grid-template-columns:1fr;}}
+.nr-sub{font-size:11px; color:var(--ink-dim); margin:-6px 0 12px;}
+.nr-lg{display:flex; gap:14px; font-size:11px; color:var(--ink-dim); margin:10px 0;}
+.nr-lg i{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px;}
+.nr i.a, .nr-lg i.a{background:var(--blue);} .nr i.b, .nr-lg i.b{background:var(--gray);}
+.nr-pb{display:flex; height:26px; border-radius:13px; overflow:hidden; background:var(--navy-700); font-size:12px; font-weight:700;}
+.nr-pb div{display:flex; align-items:center; padding:0 10px;}
+.nr-pb .a{background:var(--blue); color:#03202e;} .nr-pb .b{background:var(--gray); color:#fff; justify-content:flex-end;}
+.nr-t3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; text-align:center;}
+.nr-t3 div{background:var(--navy-700); border-radius:8px; padding:10px 6px;}
+.nr-t3 b{font-size:22px; display:block;} .nr-t3 span{font-size:10px; letter-spacing:.1em; color:var(--ink-dim);}
+.nr-r{margin-bottom:11px;}
+.nr-rl{display:flex; justify-content:space-between; gap:8px; font-size:12.5px; font-weight:600;}
+.nr-rl small{color:var(--ink-dim); font-size:10px; font-weight:400; text-align:right;}
+.nr-b{display:flex; align-items:center; gap:8px; margin-top:3px;}
+.nr-b u{flex:1; height:6px; background:var(--navy-700); border-radius:3px; overflow:hidden; text-decoration:none;}
+.nr-b u i{display:block; height:100%; border-radius:3px;}
+.nr-b em{font-style:normal; font-size:12.5px; min-width:48px; text-align:right; font-weight:700;}
+.nr-st{font-size:10px; letter-spacing:.06em; color:var(--ink-dim); font-weight:700; margin-top:6px;}
+.nr-seg{display:flex; height:24px; border-radius:6px; overflow:hidden; background:var(--navy-700); margin:3px 0 2px; font-size:12px; font-weight:700; color:#03202e;}
+.nr-seg div{display:flex; align-items:center; justify-content:center;}
+.nr-seg .a{background:var(--blue);} .nr-seg .b{background:var(--gray); color:#fff;} .nr-seg .c{background:var(--gold);}
+.nr-ax{display:flex; justify-content:space-between; font-size:10px; color:var(--ink-dim); margin-bottom:10px;}
+.nr-big{display:flex; justify-content:space-between; align-items:center; background:var(--navy-700); border-radius:8px; padding:12px 16px; margin-bottom:8px; font-weight:800; font-size:15px; letter-spacing:.06em;}
+.nr-big .vals{display:flex; gap:14px; font-size:20px;}
+.nr-q{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-top:10px;}
+.nr-q div{background:var(--navy-700); border-radius:8px; padding:12px 14px; font-size:10px; letter-spacing:.08em; color:var(--ink-dim); font-weight:700;}
+.nr-q b{display:block; font-size:26px; margin-top:6px; letter-spacing:0; font-weight:800;}
+.nr-note{border:1px dashed var(--navy-700); border-radius:8px; padding:12px; font-size:13px; white-space:pre-wrap; color:var(--ink);}
+.nr-tbl{width:100%; border-collapse:collapse; font-size:12px;}
+.nr-tbl th{font-size:10px; letter-spacing:.1em; color:var(--ink-dim); text-align:right; font-weight:600; padding:4px 0;}
+.nr-tbl td{padding:7px 0; border-top:1px solid var(--navy-700); text-align:right;}
+.nr-tbl th:first-child, .nr-tbl td:first-child{text-align:left;}
+.nr-tbl td small{color:var(--ink-dim); font-size:11px;} .nr-fr{color:var(--ink-dim); font-size:11px;}
+.nr-ct{font-size:12px; font-weight:700; color:var(--blue); margin:14px 0 8px; letter-spacing:.03em;}
+.nr-tblwrap{margin:6px 0 4px;} .nr-tt{font-size:10px; color:var(--ink-dim); margin-bottom:2px;}
+.nr .report-images{padding:0 0 14px;}
+.nr .rep-source{padding-bottom:10px;}
+@media print{ .nr-card{break-inside:avoid;} .nr-r{break-inside:avoid;} }
+
 /* ---------- LIGHT EXPORT THEME (white bg, blue accents — used for PDF print & JPEG export) ---------- */
 .export-light{ color:#0A1F3D !important; }
 .export-light .rep-header, .export-light .rep-header *{ color:#EAF1FB !important; }
@@ -260,11 +294,6 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 .export-light .stat-line-bar{ background:#E3E7ED !important; }
 .export-light .stat-line-bar .a{ background:#1C56C7 !important; }
 .export-light .stat-line-bar .b{ background:#94A0AC !important; }
-.export-light .chart-bar-track .track-bg{ background:#E3E7ED !important; }
-.export-light .chart-bar-track .track-fill.own{ background:#1C56C7 !important; }
-.export-light .chart-bar-track .track-fill.opp{ background:#94A0AC !important; }
-.export-light .chart-row-top{ color:#5b6b7c !important; }
-.export-light .chart-bar-track .track-val.opp{ color:#5b6b7c !important; }
 .export-light .index-band{ background:#E6EDFB !important; color:#0A1F3D !important; }
 .export-light .index-band .vals span:first-child{ color:#1C56C7 !important; }
 .export-light .index-band .vals span:last-child{ color:#94A0AC !important; }
@@ -290,7 +319,7 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
   body *{visibility:hidden;}
   .printable, .printable *{visibility:visible;}
   .printable{position:absolute; top:0; left:0; width:100%; border-radius:0;}
-  @page{size: A4 landscape; margin:8mm;}
+  @page{size: A4 portrait; margin:8mm;}
 }
 </style>
 </head>
@@ -673,13 +702,7 @@ function renderStatsForm(){
   const opp = STATE.opponents.find(o=>o.id===game.opponentId);
   document.getElementById('statsTitle').textContent = `Enter Stats — ${STATE.ownTeam.name} vs ${opp?opp.name:'Opponent'}`;
   let html='';
-  html += `<div class="stat-section"><h3>Uvoz iz Nacsporta</h3>
-    <div class="sub" style="margin-top:-6px;">Ubaci .xml fajl iz Nacsporta — automatski popuni polja ispod. Uvek proveri brojeve pre snimanja (par polja se procenjuje).</div>
-    <input type="file" accept=".xml" id="nacsportFile" onchange="importNacsportXML(this)">
-    <div id="nacsportStatus" style="font-size:12px;color:#888;margin-top:6px;"></div>
-  </div>`;
   html += `<div class="stat-section"><h3>Match Score</h3>
-
     <div class="row">
       <div><label>${STATE.ownTeam.name||'Your Club'} — goals</label><input type="number" id="editScoreHome" value="${game.scoreHome}"></div>
       <div><label>${opp?opp.name:'Opponent'} — goals</label><input type="number" id="editScoreAway" value="${game.scoreAway}"></div>
@@ -712,6 +735,8 @@ function renderStatsForm(){
   html += `<div class="stat-row"><label>Ball-in-Play Time — Opponent — time (mm.ss)</label>
     <input type="number" step="any" id="ballOpp" value="${game.extra.ball_opp ?? ''}"><div></div></div>`;
   html += `</div>`;
+  html += `<div class="stat-section"><h3>Analyst Notes (optional)</h3>
+    <textarea id="analystNotes" rows="3" style="width:100%;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;font-family:inherit;" placeholder="Context, data quality remarks, anything worth remembering for this match…">${(game.extra.notes||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea></div>`;
   html += `<div class="stat-section"><h3>Report Images (optional — page 2)</h3>
     <div class="sub" style="margin-top:-6px;">Upload straight from your computer — one big image, or two side by side.</div>
     <div class="row">
@@ -730,170 +755,6 @@ function renderStatsForm(){
     </div>
   </div>`;
   form.innerHTML = html;
-}
-/* ============== NACSPORT XML IMPORT ============== */
-function parseNacsportInstances(xmlText){
-  const dp = new DOMParser();
-  const doc = dp.parseFromString(xmlText, 'text/xml');
-  const nodes = Array.from(doc.getElementsByTagName('instance'));
-  return nodes.map(n=>{
-    const code = n.getElementsByTagName('code')[0]?.textContent || '';
-    const start = parseFloat(n.getElementsByTagName('start')[0]?.textContent || '0');
-    const end = parseFloat(n.getElementsByTagName('end')[0]?.textContent || '0');
-    const labels = Array.from(n.getElementsByTagName('label')).map(l=>l.getElementsByTagName('text')[0]?.textContent || '');
-    return {code, start, end, labels};
-  });
-}
-function countLabel(instances, code, label){
-  return instances.filter(i=>i.code===code && i.labels.includes(label)).length;
-}
-function countLabels(instances, code, labels){
-  return instances.filter(i=>i.code===code && labels.every(l=>i.labels.includes(l))).length;
-}
-function countGoal(instances, code, counterAttack, goalLabel){
-  goalLabel = goalLabel || 'GOAL';
-  return instances.filter(i=>i.code===code && i.labels.includes(goalLabel) && i.labels.includes('Counter')===counterAttack).length;
-}
-function secToMMSS(totalSec){
-  totalSec = Math.max(0, Math.round(totalSec));
-  const m = Math.floor(totalSec/60), s = totalSec%60;
-  return Number(m + '.' + String(s).padStart(2,'0'));
-}
-function sumDuration(instances, code){
-  return instances.filter(i=>i.code===code).reduce((a,i)=>a+(i.end-i.start),0);
-}
-function buildStatsFromNacsport(instances){
-  const own = {}, opp = {}, extra = {};
-
-  own.goal = countGoal(instances,'Attack',false,'GOAL');
-  own.goal_ca = countGoal(instances,'Attack',true,'GOAL');
-  opp.goal = countGoal(instances,'Defense',false,'GOAL Opp');
-  opp.goal_ca = countGoal(instances,'Defense',true,'GOAL Opp');
-
-  own.harmless_shot = countLabel(instances,'Attack','shot1');
-  own.dangerous_shot = countLabel(instances,'Attack','shot2');
-  own.highly_dangerous_shot = countLabel(instances,'Attack','shot3');
-  own.certain_goal_shot = countLabel(instances,'Attack','shot4');
-  opp.harmless_shot = countLabel(instances,'Defense','shot1');
-  opp.dangerous_shot = countLabel(instances,'Defense','shot2');
-  opp.highly_dangerous_shot = countLabel(instances,'Defense','shot3');
-  opp.certain_goal_shot = countLabel(instances,'Defense','shot4');
-
-  own.regular_chance = countLabel(instances,'Attack','C1');
-  own.great_chance = countLabel(instances,'Attack','C2');
-  opp.regular_chance = countLabel(instances,'Defense','C1');
-  opp.great_chance = countLabel(instances,'Defense','C2');
-
-  own.prog_first = countLabel(instances,'Build up','Progressive pass');
-  own.prog_second = countLabel(instances,'2nd Zone','Progressive pass');
-  opp.prog_first = countLabel(instances,'Opp Build up','Progressive pass');
-  opp.prog_second = countLabel(instances,'OPP 2nd Zone','Progressive pass');
-
-  own.counter_attacks = countLabel(instances,'Attack','Counter');
-  opp.counter_attacks = countLabel(instances,'Defense','Counter');
-
-  const ownCrossR = countLabel(instances,'Attack','Cross R');
-  const ownCrossL = countLabel(instances,'Attack','Cross L');
-  own.cross = ownCrossR + ownCrossL;
-  const oppCrossR = countLabel(instances,'Defense','Cross R');
-  const oppCrossL = countLabel(instances,'Defense','Cross L');
-  opp.cross = oppCrossR + oppCrossL;
-  extra.cross_right_own = ownCrossR; extra.cross_left_own = ownCrossL;
-  extra.cross_right_opp = oppCrossR; extra.cross_left_opp = oppCrossL;
-
-  own.final3rd_entry = instances.filter(i=>i.code==='Att 3rd').length;
-  opp.final3rd_entry = instances.filter(i=>i.code==='OPP Att 3rd').length;
-  extra.box_left_own = countLabel(instances,'Att 3rd','Left');
-  extra.box_center_own = countLabel(instances,'Att 3rd','Central');
-  extra.box_right_own = countLabel(instances,'Att 3rd','Right');
-  extra.box_left_opp = countLabel(instances,'OPP Att 3rd','Left');
-  extra.box_center_opp = countLabel(instances,'OPP Att 3rd','Central');
-  extra.box_right_opp = countLabel(instances,'OPP Att 3rd','Right');
-
-  own.box_entry = countLabel(instances,'Attack','BOX Entry');
-  opp.box_entry = countLabel(instances,'Defense','BOX Entry');
-
-  own.high_zone = countLabel(instances,'Defense','High Zone');
-  own.press_high = countLabels(instances,'Defense',['High Zone','PRESS']);
-  own.high_press_recoveries = countLabels(instances,'Defense',['High Zone','RECOVERIES']);
-  opp.high_zone = countLabel(instances,'Attack','High Zone Opp');
-  opp.press_high = countLabels(instances,'Attack',['High Zone Opp','PRESS']);
-  opp.high_press_recoveries = countLabels(instances,'Attack',['High Zone Opp','RECOVERIES']);
-
-  own.mid_zone = countLabel(instances,'Defense','Mid Zone');
-  own.press_mid = countLabels(instances,'Defense',['Mid Zone','PRESS']);
-  own.middle_press_recoveries = countLabels(instances,'Defense',['Mid Zone','RECOVERIES']);
-  opp.mid_zone = countLabel(instances,'Attack','Mid Zone Opp');
-  opp.press_mid = countLabels(instances,'Attack',['Mid Zone Opp','PRESS']);
-  opp.middle_press_recoveries = countLabels(instances,'Attack',['Mid Zone Opp','RECOVERIES']);
-
-  own.ball_recoveries_opp_half = countLabel(instances,'Defense','RECOVERIES');
-  opp.ball_recoveries_opp_half = countLabel(instances,'Attack','RECOVERIES');
-
-  own.repress = countLabel(instances,'Defense','RE-PRESS');
-  opp.repress = countLabel(instances,'Attack','RE-PRESS');
-
-  own.gk_saves = countLabel(instances,'Defense','GK Saves');
-  opp.gk_saves = countLabel(instances,'Attack','GK Saves');
-
-  own.clearance_after_cross = countLabel(instances,'Defense','Clearance after a cross');
-  opp.clearance_after_cross = countLabel(instances,'Attack','Clearance after a cross');
-
-  own.trigger_press = countLabel(instances,'Defense','Triggers');
-  opp.trigger_press = countLabel(instances,'Attack','Triggers');
-
-  own.free_kicks = countLabel(instances,'Attack','free kick') + countLabel(instances,'Attack','direct free kick');
-  opp.free_kicks = countLabel(instances,'Defense','free kick') + countLabel(instances,'Defense','direct free kick');
-  own.corner_kick = countLabel(instances,'Attack','corner kick');
-  opp.corner_kick = countLabel(instances,'Defense','corner kick');
-
-  extra.throw_ins_own = countLabel(instances,'Attack','throw in');
-  extra.throw_ins_opp = countLabel(instances,'Defense','throw in');
-
-  own.zone1_poss = secToMMSS(sumDuration(instances,'Build up'));
-  own.zone2_poss = secToMMSS(sumDuration(instances,'2nd Zone'));
-  own.zone3_poss = secToMMSS(sumDuration(instances,'Att 3rd'));
-  opp.zone1_poss = secToMMSS(sumDuration(instances,'OPP Att 3rd'));
-  opp.zone2_poss = secToMMSS(sumDuration(instances,'OPP 2nd Zone'));
-  opp.zone3_poss = secToMMSS(sumDuration(instances,'Opp Build up'));
-
-  const ownPossSec = sumDuration(instances,'Build up')+sumDuration(instances,'2nd Zone')+sumDuration(instances,'Att 3rd');
-  const oppPossSec = sumDuration(instances,'Opp Build up')+sumDuration(instances,'OPP 2nd Zone')+sumDuration(instances,'OPP Att 3rd');
-  const outOfPlaySec = sumDuration(instances,'Out of Play');
-  extra.ball_own = secToMMSS(ownPossSec);
-  extra.ball_opp = secToMMSS(oppPossSec);
-  extra.ball_neutral = secToMMSS(outOfPlaySec);
-
-  const scoreHome = own.goal + own.goal_ca;
-  const scoreAway = opp.goal + opp.goal_ca;
-
-  return {own, opp, extra, scoreHome, scoreAway};
-}
-function importNacsportXML(input){
-  const file = input.files[0];
-  if(!file) return;
-  const statusEl = document.getElementById('nacsportStatus');
-  statusEl.textContent = 'Čitam fajl…';
-  const reader = new FileReader();
-  reader.onload = (e)=>{
-    try{
-      const instances = parseNacsportInstances(e.target.result);
-      if(instances.length===0){ statusEl.textContent = 'Nisam pronašao <instance> elemente — da li je ovo Nacsport XML fajl?'; return; }
-      const result = buildStatsFromNacsport(instances);
-      const game = currentGame();
-      if(!game){ statusEl.textContent = 'Prvo napravi meč (New Game).'; return; }
-      Object.assign(game.own, result.own);
-      Object.assign(game.opp, result.opp);
-      Object.assign(game.extra, result.extra);
-      game.scoreHome = result.scoreHome;
-      game.scoreAway = result.scoreAway;
-      renderStatsForm();
-      statusEl.textContent = `✓ Uvezeno iz ${file.name} (${instances.length} instanci). Proveri brojeve pa klikni Save.`;
-    }catch(err){
-      statusEl.textContent = 'Greška pri parsiranju: '+err.message;
-    }
-  };
-  reader.readAsText(file);
 }
 async function handleImageUpload(input, slot){
   if(!requireLogin()){ input.value=''; return; }
@@ -944,6 +805,8 @@ async function saveStats(){
   if(bn) game.extra.ball_neutral = bn.value===''?0:Number(bn.value);
   const bp = document.getElementById('ballOpp');
   if(bp) game.extra.ball_opp = bp.value===''?0:Number(bp.value);
+  const an = document.getElementById('analystNotes');
+  if(an) game.extra.notes = an.value;
   const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra, score_own:game.scoreHome, score_opp:game.scoreAway }).eq('id', game.id);
   if(error){ alert('Error saving stats: '+error.message); return; }
   renderReport(game.id);
@@ -1045,178 +908,175 @@ function splitBar(leftVal, midVal, rightVal, leftLabel, midLabel, rightLabel){
     <div class="split-legend"><span>${leftLabel}</span><span>${midLabel}</span><span>${rightLabel}</span></div>
   </div>`;
 }
-function renderStatChart(ownName, oppName, rows){
-  return `<div class="chart-legend">
-      <span><span class="dot" style="background:var(--blue);"></span>${(ownName||'US').toUpperCase()}</span>
-      <span><span class="dot" style="background:var(--gray);"></span>${(oppName||'OPPONENT').toUpperCase()}</span>
-    </div>` +
-    rows.map(r=>{
-      const total = Math.max(0.0001, r.ownScale + r.oppScale);
-      const ownPct = Math.max(4, r.ownScale/total*100);
-      const oppPct = Math.max(4, 100-ownPct);
-      return `<div class="chart-row">
-        <div class="chart-row-top"><span>${r.label}</span></div>
-        <div class="chart-bar-track">
-          <div class="track-val own">${r.ownDisplay}</div>
-          <div class="track-bg"><div class="track-fill own" style="width:${ownPct}%;"></div><div class="track-fill opp" style="width:${oppPct}%;"></div></div>
-          <div class="track-val opp">${r.oppDisplay}</div>
-        </div>
-      </div>`;
-    }).join('');
+/* ============== REPORT RENDER (v2 — sectioned layout, same colours) ============== */
+function nrEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function nrPct(n,d){ if(!(d>0)) return null; return {txt:(+(n/d*100).toFixed(1))+'%', frac:n+'/'+d}; }
+function nrP(n,d){ const r=nrPct(n,d); return r?r.txt:'N/A'; }
+function nrRow(label,a,b,at,bt,sub){
+  const m=Math.max(a,b,1);
+  return `<div class="nr-r"><div class="nr-rl"><span>${label}</span>${sub?`<small>${sub}</small>`:''}</div>
+  <div class="nr-b"><u><i class="a" style="width:${Math.min(100,a/m*100)}%"></i></u><em class="ca">${at==null?a:at}</em></div>
+  <div class="nr-b"><u><i class="b" style="width:${Math.min(100,b/m*100)}%"></i></u><em class="cb">${bt==null?b:bt}</em></div></div>`;
+}
+function nrSeg(vals,cls,labels){
+  return `<div class="nr-seg">${vals.map((x,i)=>x>0?`<div class="${cls[i]}" style="flex:${x}">${x}</div>`:'').join('')}</div>
+  <div class="nr-ax">${labels.map(l=>`<span>${l}</span>`).join('')}</div>`;
+}
+function nrTable(title,h1,h2,rows){
+  return `<div class="nr-tblwrap"><div class="nr-tt">${title}</div><table class="nr-tbl"><tr><th></th><th>${h1}</th><th>${h2}</th></tr>
+  ${rows.map(r=>`<tr><td>${r[0]}</td><td class="ca"><b>${r[1]}</b></td><td>${r[2]}</td></tr>`).join('')}</table></div>`;
 }
 function renderReport(gameId){
   const game = STATE.games.find(g=>g.id===gameId);
   const wrap = document.getElementById('reportWrap');
   if(!game){ wrap.innerHTML = '<div class="empty">No report yet — create a game and enter stats first.</div>'; return; }
-  const R = computeReport(game);
-  const opp = R.opp;
-  const own = STATE.ownTeam;
+  const R = computeReport(game), opp = R.opp, own = STATE.ownTeam;
+  const O = game.own, A = game.opp, X = game.extra || {};
+  const oN = nrEsc((own.name||'YOUR CLUB').toUpperCase()), pN = nrEsc((opp.name||'OPPONENT').toUpperCase());
 
-  // rows that show ONE number (own vs opp)
-  const single=(label,key)=>({label,
-    ownDisplay:String(v(game.own,key)), oppDisplay:String(v(game.opp,key)),
-    ownScale:v(game.own,key), oppScale:v(game.opp,key)});
-  // rows that show TWO numbers joined by "/" (attempt/success pairs), matching the original report layout
-  const pair=(label,k1,k2)=>{
-    const o1=v(game.own,k1), o2=v(game.own,k2), a1=v(game.opp,k1), a2=v(game.opp,k2);
-    return {label, ownDisplay:`${o1}/${o2}`, oppDisplay:`${a1}/${a2}`, ownScale:o1+o2, oppScale:a1+a2};
+  const sm = S => {
+    const g = k=>v(S,k);
+    return { shots:g('harmless_shot')+g('dangerous_shot')+g('highly_dangerous_shot')+g('certain_goal_shot')+g('goal')+g('goal_ca'),
+      chances:g('regular_chance')+g('great_chance')+g('goal')+g('goal_ca')+g('highly_dangerous_shot')+g('certain_goal_shot'),
+      goals:g('goal')+g('goal_ca'), f3:g('final3rd_entry'), box:g('box_entry'), cross:g('cross') };
   };
-  const shotsOwn = v(game.own,'harmless_shot')+v(game.own,'dangerous_shot')+v(game.own,'highly_dangerous_shot')+v(game.own,'certain_goal_shot')+v(game.own,'goal')+v(game.own,'goal_ca');
-  const shotsOpp = v(game.opp,'harmless_shot')+v(game.opp,'dangerous_shot')+v(game.opp,'highly_dangerous_shot')+v(game.opp,'certain_goal_shot')+v(game.opp,'goal')+v(game.opp,'goal_ca');
-  const chances = (v(game.own,'regular_chance')+v(game.own,'great_chance')+v(game.own,'goal')+v(game.own,'goal_ca')+v(game.own,'highly_dangerous_shot')+v(game.own,'certain_goal_shot'));
-  const chancesOpp = (v(game.opp,'regular_chance')+v(game.opp,'great_chance')+v(game.opp,'goal')+v(game.opp,'goal_ca')+v(game.opp,'highly_dangerous_shot')+v(game.opp,'certain_goal_shot'));
+  const so = sm(O), sa = sm(A);
+  const lg = `<div class="nr-lg"><span><i class="a"></i>${oN}</span><span><i class="b"></i>${pN}</span></div>`;
+  const cmp = (lab,o,a)=> `${lab} ${o?o.txt:'—'} vs ${a?a.txt:'—'}`;
+  const one = (label,key)=> nrRow(label, v(O,key), v(A,key));
+  const pair = (label,k1,k2,rateLabel)=> nrRow(label, v(O,k1), v(A,k1), `${v(O,k1)}/${v(O,k2)}`, `${v(A,k1)}/${v(A,k2)}`,
+    cmp(rateLabel, nrPct(v(O,k2),v(O,k1)), nrPct(v(A,k2),v(A,k1))));
 
-  const attackRows = [
-    single('Progression (Build-up)', 'prog_first'),
-    single('Progression (Middle Third)', 'prog_second'),
-    pair('Counter Attacks / Final 3rd', 'counter_attacks', 'counter_final3rd'),
-    single('Crosses', 'cross'),
-    {label:'Shots', ownDisplay:String(shotsOwn), oppDisplay:String(shotsOpp), ownScale:shotsOwn, oppScale:shotsOpp},
-    {label:'Chances', ownDisplay:String(chances), oppDisplay:String(chancesOpp), ownScale:chances, oppScale:chancesOpp},
-    single('Final 3rd Entries', 'final3rd_entry'),
-    single('Box Entries', 'box_entry'),
-  ];
-  const defendRows = [
-    pair('High Zone / Press', 'high_zone', 'press_high'),
-    single('High Press Recoveries', 'high_press_recoveries'),
-    pair('Mid Zone / Press', 'mid_zone', 'press_mid'),
-    single('Middle Press Recoveries', 'middle_press_recoveries'),
-    single("Ball Recoveries (Opponent's Half)", 'ball_recoveries_opp_half'),
-    pair('Repress / Recoveries', 'repress', 'repress_recoveries'),
-    single('Clearance After Cross', 'clearance_after_cross'),
-    single('Goalkeeper Saves', 'gk_saves'),
-    pair('Trigger Press / Recoveries', 'trigger_press', 'trigger_press_recoveries'),
-  ];
+  const attack = [
+    one('Progression (Build-up)','prog_first'), one('Progression (Middle Third)','prog_second'),
+    pair('Counter Attacks / Final 3rd','counter_attacks','counter_final3rd','success'),
+    nrRow('Crosses',so.cross,sa.cross), nrRow('Shots',so.shots,sa.shots), nrRow('Chances',so.chances,sa.chances),
+    nrRow('Final 3rd Entries',so.f3,sa.f3), nrRow('Box Entries',so.box,sa.box)].join('');
+  const defend = [
+    pair('High Zone / Press','high_zone','press_high','press rate'), one('High Press Recoveries','high_press_recoveries'),
+    pair('Mid Zone / Press','mid_zone','press_mid','press rate'), one('Middle Press Recoveries','middle_press_recoveries'),
+    one("Ball Recoveries (Opponent's Half)",'ball_recoveries_opp_half'),
+    pair('Repress / Recoveries','repress','repress_recoveries','recovery rate'),
+    one('Clearance After Cross','clearance_after_cross'), one('Goalkeeper Saves','gk_saves'),
+    pair('Trigger Press / Recoveries','trigger_press','trigger_press_recoveries','recovery rate')].join('');
 
-  wrap.innerHTML = `
-  <div class="report-page">
-  <div class="rep-header">
-    <div class="rep-eyebrow">${(game.competition||'MATCH REPORT').toUpperCase()}</div>
+  // time in possession / thirds
+  const bo=(X.ball_own||0)*61, bn=(X.ball_neutral||0)*61, bp=(X.ball_opp||0)*61;
+  const thirds = ['DEFENSIVE','MIDDLE','ATTACKING'].map((n,i)=>nrRow(n, R.ownSec[i], R.oppSec[i], fmtSec(R.ownSec[i]), fmtSec(R.oppSec[i]))).join('');
+
+  // conversion & efficiency
+  const CV=[['Shot conversion','Goals per shot','goals','shots'],['Chance conversion','Goals per chance','goals','chances'],['Shot → chance','Chances per shot','chances','shots'],
+    ['Final 3rd entry → shot','Shots per final 3rd entry','shots','f3'],['Final 3rd entry → cross','Crosses per final 3rd entry','cross','f3'],['Final 3rd entry → chance','Chances per final 3rd entry','chances','f3'],['Final 3rd entry → box entry','Box entries per final 3rd entry','box','f3'],
+    ['Box entry → shot','Shots per box entry','shots','box'],['Box entry → cross','Crosses per box entry','cross','box'],['Box entry → chance','Chances per box entry','chances','box'],['Box entry → goal','Goals per box entry','goals','box']];
+  const cell = r => r? `<b>${r.txt}</b> <span class="nr-fr">${r.frac}</span>` : '<span class="nr-fr">N/A</span>';
+  const cvRows = CV.map(([n,d,a,b])=>{
+    const ro=nrPct(so[a],so[b]), ra=nrPct(sa[a],sa[b]);
+    if(!ro && !ra) return '';
+    return `<tr><td>${n} <small>${d}</small></td><td class="ca">${cell(ro)}</td><td>${cell(ra)}</td></tr>`;
+  }).join('');
+
+  // phase chains
+  const hp1={bu:v(O,'prog_first'), z:v(A,'high_zone'), p:v(A,'press_high'), r:v(A,'high_press_recoveries')};
+  const hp2={bu:v(A,'prog_first'), z:v(O,'high_zone'), p:v(O,'press_high'), r:v(O,'high_press_recoveries')};
+  const mp1={bu:v(O,'prog_second'), z:v(A,'mid_zone'), p:v(A,'press_mid'), r:v(A,'middle_press_recoveries')};
+  const mp2={bu:v(A,'prog_second'), z:v(O,'mid_zone'), p:v(O,'press_mid'), r:v(O,'middle_press_recoveries')};
+  const duelHead = [`${oN} (DUEL 1)`, `${pN} (DUEL 2)`];
+  const chains = `
+    <div class="nr-ct">Build-up vs the opponent's high press</div>
+    ${nrRow('Build-up',hp1.bu,hp2.bu)}${nrRow('Opp. high zone',hp1.z,hp2.z)}${nrRow('Opp. press',hp1.p,hp2.p)}${nrRow('Opp. recoveries',hp1.r,hp2.r)}
+    ${nrTable(`DUEL 1 — ${oN} build-up vs ${pN} high press · DUEL 2 — ${pN} build-up vs ${oN} high press`,duelHead[0],duelHead[1],[
+      ['Press rate',nrP(hp1.p,hp1.z),nrP(hp2.p,hp2.z)],['Recovery / press',nrP(hp1.r,hp1.p),nrP(hp2.r,hp2.p)],
+      ['Lost build-ups',nrP(hp1.r,hp1.bu),nrP(hp2.r,hp2.bu)],['High-zone pressure',nrP(hp1.z,hp1.bu),nrP(hp2.z,hp2.bu)]])}
+    <div class="nr-ct">Middle-third progression vs the opponent's mid press</div>
+    ${nrRow('Middle progression',mp1.bu,mp2.bu)}${nrRow('Opp. mid zone',mp1.z,mp2.z)}${nrRow('Opp. press',mp1.p,mp2.p)}${nrRow('Opp. recoveries',mp1.r,mp2.r)}
+    ${nrTable(`DUEL 1 — ${oN} middle third vs ${pN} mid press · DUEL 2 — ${pN} middle third vs ${oN} mid press`,duelHead[0],duelHead[1],[
+      ['Press rate',nrP(mp1.p,mp1.z),nrP(mp2.p,mp2.z)],['Recovery / press',nrP(mp1.r,mp1.p),nrP(mp2.r,mp2.p)],
+      ['Lost progressions',nrP(mp1.r,mp1.bu),nrP(mp2.r,mp2.bu)]])}
+    <div class="nr-ct">Final 3rd entries → Box entries → Shots / Chances / Goals</div>
+    ${nrRow('Final 3rd',so.f3,sa.f3)}${nrRow('Box',so.box,sa.box)}${nrRow('Shots',so.shots,sa.shots)}${nrRow('Chances',so.chances,sa.chances)}${nrRow('Goals',so.goals,sa.goals)}
+    ${nrTable(`DUEL 1 — ${oN} attack (defended by ${pN}) · DUEL 2 — ${pN} attack (defended by ${oN})`,duelHead[0],duelHead[1],[
+      ['Final 3rd → box',nrP(so.box,so.f3),nrP(sa.box,sa.f3)],['Box → shot',nrP(so.shots,so.box),nrP(sa.shots,sa.box)],
+      ['Box → chance',nrP(so.chances,so.box),nrP(sa.chances,sa.box)],['Box → goal',nrP(so.goals,so.box),nrP(sa.goals,sa.box)],
+      ['Final 3rd → goal',nrP(so.goals,so.f3),nrP(sa.goals,sa.f3)]])}`;
+
+  const img1 = X.image1_url, img2 = X.image2_url;
+  const images = (!img1 && !img2) ? '' : (img1 && img2)
+    ? `<div class="report-images two"><img src="${img1}" crossorigin="anonymous"><img src="${img2}" crossorigin="anonymous"></div>`
+    : `<div class="report-images one"><img src="${img1||img2}" crossorigin="anonymous"></div>`;
+  const notes = (X.notes||'').trim();
+  const logo = (t,name)=> t.logo? `<img src="${t.logo}" crossorigin="anonymous">` : `<div class="fallback">${nrEsc((name||'?').slice(0,3).toUpperCase())}</div>`;
+
+  wrap.innerHTML = `<div class="nr">
+  <div class="nr-head">
+    <div class="nr-eyebrow">${nrEsc((game.competition||'MATCH REPORT').toUpperCase())}</div>
     <div class="rep-teams">
-      <div class="rep-team">
-        ${own.logo? `<img src="${own.logo}" crossorigin="anonymous">`:`<div class="fallback">${(own.name||'?').slice(0,3).toUpperCase()}</div>`}
-        <div class="tname">${(own.name||'YOUR CLUB').toUpperCase()}</div>
+      <div class="rep-team">${logo(own,own.name)}<div class="tname">${oN}</div></div>
+      <div><div class="rep-score">${game.scoreHome} – ${game.scoreAway}</div><div class="rep-date">${fmtDateDMY(game.date)}</div></div>
+      <div class="rep-team">${logo(opp,opp.name)}<div class="tname">${pN}</div></div>
+    </div>
+    <div class="nr-id">
+      <div class="nr-f"><span>Team</span>${oN}</div><div class="nr-f"><span>Opposition</span>${pN}</div>
+      <div class="nr-f"><span>Date</span>${fmtDateDMY(game.date)}</div><div class="nr-f"><span>Competition</span>${nrEsc((game.competition||'—').toUpperCase())}</div>
+      <div class="nr-f"><span>${oN} goals</span>${game.scoreHome}</div><div class="nr-f"><span>${pN} goals</span>${game.scoreAway}</div>
+    </div>
+  </div>
+
+  <div class="nr-card"><h3>Possession</h3>
+    <div class="nr-pb"><div class="a" style="width:${R.possOwn}%">${R.possOwn}%</div><div class="b" style="width:${R.possOpp}%">${R.possOpp}%</div></div>
+    ${lg}
+    <div class="nr-t3">
+      <div><b class="ca">${fmtSec(bo)}</b><span>${oN} · TIME IN POSSESSION</span></div>
+      <div><b>${fmtSec(bn)}</b><span>OUT OF PLAY (MATCH TOTAL)</span></div>
+      <div><b class="cg">${fmtSec(bp)}</b><span>${pN} · TIME IN POSSESSION</span></div>
+    </div>
+    <div class="nr-ct" style="margin-top:14px">Possession time by pitch third</div>${thirds}
+  </div>
+
+  <div class="nr-grid">
+    <div class="nr-card"><h3>Attacking actions</h3>${lg}${attack}</div>
+    <div class="nr-card"><h3>Defending actions</h3>${lg}${defend}</div>
+  </div>
+
+  <div class="nr-card"><h3>Set pieces &amp; entries</h3>${lg}
+    ${nrRow('Throw-ins', X.throw_ins_own||0, X.throw_ins_opp||0)}
+    ${nrRow('Free Kicks / Corners', O.free_kicks||0, A.free_kicks||0, `${O.free_kicks||0}/${O.corner_kick||0}`, `${A.free_kicks||0}/${A.corner_kick||0}`, 'free kicks / corners')}
+    <div class="nr-grid" style="margin-top:8px">
+      <div>
+        <div class="nr-st">FINAL 3RD ENTRIES L / C / R — ${oN}</div>${nrSeg([X.box_left_own||0,X.box_center_own||0,X.box_right_own||0],['a','b','c'],['LEFT','CENTER','RIGHT'])}
+        <div class="nr-st">FINAL 3RD ENTRIES L / C / R — ${pN}</div>${nrSeg([X.box_left_opp||0,X.box_center_opp||0,X.box_right_opp||0],['a','b','c'],['LEFT','CENTER','RIGHT'])}
       </div>
       <div>
-        <div class="rep-score">${game.scoreHome} – ${game.scoreAway}</div>
-        <div class="rep-date">${fmtDateDMY(game.date)}</div>
-      </div>
-      <div class="rep-team">
-        ${opp.logo? `<img src="${opp.logo}" crossorigin="anonymous">`:`<div class="fallback">${opp.name.slice(0,3).toUpperCase()}</div>`}
-        <div class="tname">${opp.name.toUpperCase()}</div>
+        <div class="nr-st">CROSSES R / L — ${oN}</div>${nrSeg([X.cross_right_own||0,X.cross_left_own||0],['a','c'],['RIGHT','LEFT'])}
+        <div class="nr-st">CROSSES R / L — ${pN}</div>${nrSeg([X.cross_right_opp||0,X.cross_left_opp||0],['a','c'],['RIGHT','LEFT'])}
       </div>
     </div>
   </div>
 
-  <div class="poss-wrap">
-    <div class="poss-label">BALL POSSESSION</div>
-    <div class="poss-bar">
-      <div class="a" style="width:${R.possOwn}%;">${R.possOwn}%</div>
-      <div class="b" style="width:${R.possOpp}%;">${R.possOpp}%</div>
+  <div class="nr-card"><h3>Index &amp; match quality</h3>
+    <div class="nr-big"><span>ATTACK INDEX</span><span class="vals"><span class="ca">${R.ownAttack.toFixed(0)}</span><span class="cg">${R.oppAttack.toFixed(0)}</span></span></div>
+    <div class="nr-big"><span>DEFENSE INDEX</span><span class="vals"><span class="ca">${R.ownDefend.toFixed(0)}</span><span class="cg">${R.oppDefend.toFixed(0)}</span></span></div>
+    <div class="nr-q">
+      <div>TOTAL POINTS<b><span class="ca">${R.ownTotal.toFixed(0)}</span> <span class="cg">${R.oppTotal.toFixed(0)}</span></b></div>
+      <div>POINTS (BY OPPONENT STRENGTH)<b><span class="ca">${R.ownWeighted.toFixed(0)}</span> <span class="cg">${R.oppWeighted.toFixed(0)}</span></b></div>
+      <div>SHARE %<b><span class="ca">${R.pctTotal[0]}%</span> <span class="cg">${R.pctTotal[1]}%</span></b></div>
+      <div>SHARE % (BY OPPONENT STRENGTH)<b><span class="ca">${R.pctWeighted[0]}%</span> <span class="cg">${R.pctWeighted[1]}%</span></b></div>
     </div>
   </div>
 
-  <div class="grid2">
-    <div class="stat-card">
-      <div class="stat-card-head">ATTACKING ACTIONS</div>
-      ${renderStatChart(own.name, opp.name, attackRows)}
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-head">DEFENDING ACTIONS</div>
-      ${renderStatChart(own.name, opp.name, defendRows)}
-    </div>
+  ${notes? `<div class="nr-card"><h3>Analyst notes</h3><div class="nr-note">${nrEsc(notes)}</div></div>`:''}
+
+  <div class="nr-card"><h3>Conversion &amp; efficiency</h3>
+    <div class="nr-sub">Derived from the values above — shown only when both counts exist, never estimated.</div>
+    <table class="nr-tbl"><tr><th>RATIO</th><th>${oN}</th><th>${pN}</th></tr>${cvRows}</table>
   </div>
 
-  <div class="bottom2">
-    <div class="bcard">
-      <div class="lbl">POSSESSION TIME BY PITCH THIRD</div>
-      ${renderStatChart(own.name, opp.name, [
-        {label:'DEFENSIVE', ownDisplay:fmtSec(R.ownSec[0]), oppDisplay:fmtSec(R.oppSec[0]), ownScale:R.ownSec[0], oppScale:R.oppSec[0]},
-        {label:'MIDDLE', ownDisplay:fmtSec(R.ownSec[1]), oppDisplay:fmtSec(R.oppSec[1]), ownScale:R.ownSec[1], oppScale:R.oppSec[1]},
-        {label:'ATTACKING', ownDisplay:fmtSec(R.ownSec[2]), oppDisplay:fmtSec(R.oppSec[2]), ownScale:R.ownSec[2], oppScale:R.oppSec[2]},
-      ])}
-    </div>
-    <div class="bcard">
-      <div class="lbl">TIME IN POSSESSION</div>
-      <div class="bt-chart">
-        ${(()=>{
-          const ownSec = (game.extra.ball_own||0)*61, neuSec=(game.extra.ball_neutral||0)*61, oppSec=(game.extra.ball_opp||0)*61;
-          const totSec = ownSec+neuSec+oppSec || 1;
-          const hOwn = ownSec/totSec*100, hNeu = neuSec/totSec*100, hOpp = oppSec/totSec*100;
-          return `<div class="bt-col"><div class="val">${fmtSec(ownSec)}</div><div class="bar" style="height:${hOwn}%; background:var(--blue);"></div><div class="name">${(own.name||'CLUB').toUpperCase()}</div></div>
-        <div class="bt-col"><div class="val">${fmtSec(neuSec)}</div><div class="bar" style="height:${hNeu}%; background:var(--gray);"></div><div class="name">OUT OF PLAY</div></div>
-        <div class="bt-col"><div class="val">${fmtSec(oppSec)}</div><div class="bar" style="height:${hOpp}%; background:var(--gold);"></div><div class="name">${opp.name.toUpperCase()}</div></div>`;
-        })()}
-      </div>
-    </div>
+  <div class="nr-card"><h3>Phase chains — attack &amp; defence</h3>
+    <div class="nr-sub">Two duels per chain. Pressing values belong to the team defending that attack; missing values stay “N/A”.</div>
+    ${chains}
   </div>
-
-  <div class="footbar">
-    <div class="lbl">SET PIECES &amp; ENTRIES</div>
-    ${renderStatChart(own.name, opp.name, [
-      {label:'THROW-INS', ownDisplay:String(game.extra.throw_ins_own||0), oppDisplay:String(game.extra.throw_ins_opp||0), ownScale:game.extra.throw_ins_own||0, oppScale:game.extra.throw_ins_opp||0},
-      {label:'FREE KICKS / CORNERS', ownDisplay:`${game.own.free_kicks||0}/${game.own.corner_kick||0}`, oppDisplay:`${game.opp.free_kicks||0}/${game.opp.corner_kick||0}`, ownScale:(game.own.free_kicks||0)+(game.own.corner_kick||0), oppScale:(game.opp.free_kicks||0)+(game.opp.corner_kick||0)},
-    ])}
-    <div class="grid2" style="padding:14px 0 0;">
-      <div>
-        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${(own.name||'US').toUpperCase()}</div>
-        ${splitBar(game.extra.box_left_own||0, game.extra.box_center_own||0, game.extra.box_right_own||0, 'LEFT','CENTER','RIGHT')}
-        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${opp.name.toUpperCase()}</div>
-        ${splitBar(game.extra.box_left_opp||0, game.extra.box_center_opp||0, game.extra.box_right_opp||0, 'LEFT','CENTER','RIGHT')}
-      </div>
-      <div>
-        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">CROSSES R / L — ${(own.name||'US').toUpperCase()}</div>
-        ${splitBar(game.extra.cross_right_own||0, 0, game.extra.cross_left_own||0, 'RIGHT','','LEFT')}
-        <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">CROSSES R / L — ${opp.name.toUpperCase()}</div>
-        ${splitBar(game.extra.cross_right_opp||0, 0, game.extra.cross_left_opp||0, 'RIGHT','','LEFT')}
-      </div>
-    </div>
-  </div>
-  </div>
-
-  <div class="report-page">
-  <div class="page-tag">PAGE 2 — INDEX</div>
-  <div class="index-band"><span>ATTACK INDEX</span><span class="vals"><span>${R.ownAttack.toFixed(0)}</span><span>${R.oppAttack.toFixed(0)}</span></span></div>
-  <div class="index-band" style="margin-top:-8px;"><span>DEFENSE INDEX</span><span class="vals"><span>${R.ownDefend.toFixed(0)}</span><span>${R.oppDefend.toFixed(0)}</span></span></div>
-
-  <div class="mq-title">INDEX MATCH QUALITY</div>
-  <div class="mq-grid">
-    <div class="mq-card"><div class="lbl">TOTAL POINTS</div><div class="nums"><span>${R.ownTotal.toFixed(0)}</span><span>${R.oppTotal.toFixed(0)}</span></div></div>
-    <div class="mq-card"><div class="lbl">POINTS (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.ownWeighted.toFixed(0)}</span><span>${R.oppWeighted.toFixed(0)}</span></div></div>
-    <div class="mq-card"><div class="lbl">SHARE %</div><div class="nums"><span>${R.pctTotal[0]}%</span><span>${R.pctTotal[1]}%</span></div></div>
-    <div class="mq-card"><div class="lbl">SHARE % (BY OPPONENT STRENGTH)</div><div class="nums"><span>${R.pctWeighted[0]}%</span><span>${R.pctWeighted[1]}%</span></div></div>
-  </div>
-  ${(()=>{
-    const img1 = game.extra.image1_url, img2 = game.extra.image2_url;
-    if(!img1 && !img2) return '';
-    if(img1 && img2){
-      return `<div class="report-images two"><img src="${img1}" crossorigin="anonymous"><img src="${img2}" crossorigin="anonymous"></div>`;
-    }
-    return `<div class="report-images one"><img src="${img1||img2}" crossorigin="anonymous"></div>`;
-  })()}
+  ${images}
   <div class="rep-source">Generated by Match Report Builder</div>
-  </div>
-  `;
+  </div>`;
 }
 
 /* ============== HISTORY TAB ============== */
@@ -1386,22 +1246,16 @@ function renderSeasonStats(){
 
 /* ============== EXPORT: PDF (print, light theme) & JPEG ============== */
 function exportPDF(elId){
-  const el = document.getElementById(elId);
-  el.classList.add('export-light');
   window.print();
-  setTimeout(()=> el.classList.remove('export-light'), 500);
 }
 function exportImage(elId, filename){
   const el = document.getElementById(elId);
-  el.classList.add('export-light');
-  html2canvas(el, {backgroundColor:'#ffffff', scale:2, useCORS:true, allowTaint:false}).then(canvas=>{
-    el.classList.remove('export-light');
+  html2canvas(el, {backgroundColor:'#0E1F38', scale:2, useCORS:true, allowTaint:false}).then(canvas=>{
     const link = document.createElement('a');
     link.download = `${filename}-${new Date().toISOString().slice(0,10)}.jpg`;
     link.href = canvas.toDataURL('image/jpeg', 0.95);
     link.click();
   }).catch(err=>{
-    el.classList.remove('export-light');
     alert('Image export failed (likely a hotlink/CORS restriction on one of the images): '+err.message);
   });
 }
