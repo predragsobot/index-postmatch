@@ -287,8 +287,26 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
   .nr-p4 .nr-r{margin-bottom:2px;} .nr-p4 .nr-b{margin-top:0;} .nr-p4 .nr-b u{height:5px;}
   .nr-p4 .nr-tbl td{padding:2px 0;} .nr-p4 .nr-tbl th{padding:2px 0;} .nr-p4 .nr-ct{margin:6px 0 3px;} .nr-p4 .nr-tblwrap{margin:2px 0 0;}
   .nr-p4 .nr-rl{font-size:10.5px;} .nr-p4 .nr-b em{font-size:11px;} .nr-p4 .nr-tbl{font-size:10.5px;} .nr-p4 .rep-source{padding:2px 0 0;}
-  .nr-p3 .nr-tbl td{padding:5px 0;}
+  .nr-p3 .nr-grid{grid-template-columns:1fr 1fr !important; gap:10px !important; margin-bottom:10px;}
+  .nr-p3 .nr-card{padding:12px 14px; margin-bottom:10px;} .nr-p3 .nr-card h3{margin-bottom:8px;}
+  .nr-p3 .nr-grid .nr-card{margin-bottom:0;}
+  .nr-p3 .nr-big{padding:8px 14px; margin-bottom:6px;} .nr-p3 .nr-big .vals{font-size:18px;}
+  .nr-p3 .nr-q{grid-template-columns:repeat(4,1fr); gap:8px; margin-top:6px;} .nr-p3 .nr-q div{padding:8px 10px; font-size:9px;} .nr-p3 .nr-q b{font-size:19px; margin-top:3px;}
+  .nr-p3 .nr-r{margin-bottom:8px;} .nr-p3 .nr-tbl td{padding:4px 0;} .nr-p3 .nr-sub{margin-bottom:8px;}
   .nr-p2 .report-images{padding:0 !important; margin-top:12px; display:grid !important;} .nr-p2 .report-images img{width:100% !important; height:auto !important; max-height:610px !important; object-fit:contain;}
+}
+
+#extraWrap{background:var(--navy-900); border-radius:16px; overflow:hidden; color:var(--ink); font-family:'Segoe UI',sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+.extra-label{margin:22px 0 8px; font-size:11px; letter-spacing:.12em; color:#6b7a90; font-weight:700;}
+.nr-extra .nr-card{break-inside:avoid;}
+@media print{
+  .extra-label{display:none !important;}
+  #extraWrap{display:none !important;}
+  body.print-extra #reportWrap{display:none !important;}
+  body.print-extra #extraWrap{display:block !important; visibility:visible; position:absolute; top:0; left:0; width:100%; border-radius:0;}
+  body.print-extra #extraWrap *{visibility:visible;}
+  .nr-extra .nr-grid{grid-template-columns:1fr 1fr !important; gap:10px !important; margin-bottom:10px;}
+  .nr-extra .nr-grid .nr-card{margin-bottom:0;}
 }
 
 /* ---------- LIGHT EXPORT THEME (white bg, blue accents — used for PDF print & JPEG export) ---------- */
@@ -471,10 +489,14 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
   <div class="actions-bar">
     <button class="btn secondary" onclick="exportPDF('reportWrap')">⬇ Export to PDF</button>
     <button class="btn secondary" onclick="exportImage('reportWrap','match-report')">⬇ Export as JPEG</button>
+    <button class="btn secondary" onclick="exportPDF('extraWrap')">⬇ Passing &amp; xG — PDF</button>
+    <button class="btn secondary" onclick="exportImage('extraWrap','passing-xg')">⬇ Passing &amp; xG — JPEG</button>
     <button class="btn secondary" onclick="editCurrentGame()">✎ Edit This Report</button>
     <button class="btn danger" onclick="deleteCurrentGame()">🗑 Delete This Report</button>
   </div>
   <div id="reportWrap" class="printable"><div class="empty">No report yet — create a game and enter stats first.</div></div>
+  <div class="extra-label">PASSING &amp; xG — printed separately (use the “Passing &amp; xG” buttons above)</div>
+  <div id="extraWrap"></div>
 </div>
 
 <!-- OPPONENTS OVERVIEW -->
@@ -759,6 +781,13 @@ function renderStatsForm(){
   html += `<div class="stat-row"><label>Ball-in-Play Time — Opponent — time (mm.ss)</label>
     <input type="number" step="any" id="ballOpp" value="${game.extra.ball_opp ?? ''}"><div></div></div>`;
   html += `</div>`;
+  html += `<div class="stat-section"><h3>Pass Model (for estimated passes)</h3>
+    <div class="sub" style="margin-top:-6px;">Passes are estimated from time in possession per third. Set the passing tempo and accuracy of each team in this match.</div>
+    <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 14px;align-items:center;font-size:13px;">
+      <span></span><b>Tempo</b><b>Accuracy</b>
+      <span>Your club</span><select id="passOwnTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_own_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select><select id="passOwn" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['same','Same (standard)'],['better','Better'],['top','Top'],['low','Low']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_own||'same')===v?' selected':''}>${l}</option>`).join('')}</select>
+      <span>Opponent</span><select id="passOppTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_opp_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select><select id="passOpp" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['same','Same (standard)'],['better','Better'],['top','Top'],['low','Low']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_opp||'same')===v?' selected':''}>${l}</option>`).join('')}</select>
+    </div></div>`;
   html += `<div class="stat-section"><h3>Analyst Notes (optional)</h3>
     <textarea id="analystNotes" rows="3" style="width:100%;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;font-family:inherit;" placeholder="Context, data quality remarks, anything worth remembering for this match…">${(game.extra.notes||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea></div>`;
   html += `<div class="stat-section"><h3>Report Images (optional — page 2)</h3>
@@ -911,6 +940,7 @@ async function saveStats(){
   if(bn) game.extra.ball_neutral = bn.value===''?0:Number(bn.value);
   const bp = document.getElementById('ballOpp');
   if(bp) game.extra.ball_opp = bp.value===''?0:Number(bp.value);
+  [['passOwn','pass_own'],['passOpp','pass_opp'],['passOwnTempo','pass_own_tempo'],['passOppTempo','pass_opp_tempo']].forEach(([id,k])=>{ const e=document.getElementById(id); if(e) game.extra[k]=e.value; });
   const an = document.getElementById('analystNotes');
   if(an) game.extra.notes = an.value;
   const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra, score_own:game.scoreHome, score_opp:game.scoreAway }).eq('id', game.id);
@@ -1032,10 +1062,33 @@ function nrTable(title,h1,h2,rows){
   return `<div class="nr-tblwrap"><div class="nr-tt">${title}</div><table class="nr-tbl"><tr><th></th><th>${h1}</th><th>${h2}</th></tr>
   ${rows.filter(r=>!(r[1]==='N/A'&&r[2]==='N/A')).map(r=>`<tr><td>${r[0]}</td><td class="ca"><b>${r[1]}</b></td><td>${r[2]}</td></tr>`).join('')}</table></div>`;
 }
+/* ============== PASSING & xG MODELS (edit the numbers here) ============== */
+const PASS_MODEL = {
+  secPerPass: { own:[4.5,5,5.5], opp:[5,5.5,6] },        // seconds of possession per pass, zone 1 / 2 / 3 (normal tempo)
+  tempo:      { slow:1.10, normal:1, fast:0.935 },        // multiplies seconds per pass
+  accuracy:   { same:[.85,.78,.65], better:[.90,.82,.70], top:[.91,.87,.72], low:[.80,.75,.60] }   // pass success rate per zone
+};
+const XG_MODEL = {            // expected goals per tagged event
+  harmless_shot:.025, dangerous_shot:.07, highly_dangerous_shot:.14, certain_goal_shot:.45,
+  goal:.22, goal_ca:.30,      // scored shots (counter-attack goal a bit higher)
+  regular_chance:.07, great_chance:.22   // chances without a shot
+};
+const XG_LABELS = { harmless_shot:'Harmless shot', dangerous_shot:'Dangerous shot', highly_dangerous_shot:'Highly dangerous shot', certain_goal_shot:'Certain-goal shot',
+  goal:'Goal', goal_ca:'Goal (counter attack)', regular_chance:'Regular chance', great_chance:'Great chance' };
+function calcPasses(secs, team, profile, tempo){
+  const mult = PASS_MODEL.tempo[tempo] || 1;
+  const per = PASS_MODEL.secPerPass[team].map(x=>x*mult), acc = PASS_MODEL.accuracy[profile] || PASS_MODEL.accuracy.same;
+  const zones = secs.map((t,i)=>{ const att=(t||0)/per[i]; return {att, ok:att*acc[i]}; });
+  const att = zones.reduce((a,z)=>a+z.att,0), ok = zones.reduce((a,z)=>a+z.ok,0);
+  return {zones, att, ok, acc: att>0? ok/att*100 : 0};
+}
+function calcXG(S){
+  return Object.keys(XG_MODEL).reduce((sum,k)=> sum + (Number((S||{})[k])||0)*XG_MODEL[k], 0);
+}
 function renderReport(gameId){
   const game = STATE.games.find(g=>g.id===gameId);
   const wrap = document.getElementById('reportWrap');
-  if(!game){ wrap.innerHTML = '<div class="empty">No report yet — create a game and enter stats first.</div>'; return; }
+  if(!game){ wrap.innerHTML = '<div class="empty">No report yet — create a game and enter stats first.</div>'; const e0=document.getElementById('extraWrap'); if(e0) e0.innerHTML=''; return; }
   const R = computeReport(game), opp = R.opp, own = STATE.ownTeam;
   const O = game.own, A = game.opp, X = game.extra || {};
   const oN = nrEsc((own.name||'YOUR CLUB').toUpperCase()), pN = nrEsc((opp.name||'OPPONENT').toUpperCase());
@@ -1105,6 +1158,35 @@ function renderReport(gameId){
       ['Box → chance',nrP(so.chances,so.box),nrP(sa.chances,sa.box)],['Box → goal',nrP(so.goals,so.box),nrP(sa.goals,sa.box)],
       ['Final 3rd → goal',nrP(so.goals,so.f3),nrP(sa.goals,sa.f3)]])}`;
 
+
+  // passing (estimated from time in possession) and expected goals — printed on a separate page
+  const pfOwn = X.pass_own||'same', pfOpp = X.pass_opp||'same', tpOwn = X.pass_own_tempo||'normal', tpOpp = X.pass_opp_tempo||'normal';
+  const pOwn = calcPasses(R.ownSec,'own',pfOwn,tpOwn), pOpp = calcPasses(R.oppSec,'opp',pfOpp,tpOpp);
+  const xgO = calcXG(O), xgA = calcXG(A);
+  const shotsO = so.shots, shotsA = sa.shots;
+  const r0 = n=>Math.round(n);
+  const PL = {same:'Same',better:'Better',top:'Top',low:'Low'}, TL = {slow:'Slow',normal:'Normal',fast:'Fast'};
+  const passCard = (pOwn.att+pOpp.att)>0 ? `<div class="nr-card"><h3>Passing — estimated</h3>${lg}
+    <div class="nr-sub">Estimated from time in possession in each third · shown as attempted / successful.</div>
+    ${['DEFENSIVE THIRD','MIDDLE THIRD','ATTACKING THIRD'].map((n,i)=>nrRow(n, pOwn.zones[i].att, pOpp.zones[i].att, `${r0(pOwn.zones[i].att)} / ${r0(pOwn.zones[i].ok)}`, `${r0(pOpp.zones[i].att)} / ${r0(pOpp.zones[i].ok)}`)).join('')}
+    ${nrRow('TOTAL PASSES', pOwn.att, pOpp.att, `${r0(pOwn.att)} / ${r0(pOwn.ok)}`, `${r0(pOpp.att)} / ${r0(pOpp.ok)}`)}
+    ${nrRow('PASS ACCURACY', pOwn.acc, pOpp.acc, pOwn.acc.toFixed(1)+'%', pOpp.acc.toFixed(1)+'%')}
+    <div class="nr-sub" style="margin:8px 0 0;">Model: ${oN} tempo ${TL[tpOwn]||'Normal'} · accuracy ${PL[pfOwn]||'Same'} &nbsp;|&nbsp; ${pN} tempo ${TL[tpOpp]||'Normal'} · accuracy ${PL[pfOpp]||'Same'}</div>
+  </div>` : '';
+  const xgCard = (xgO+xgA)>0 ? `<div class="nr-card"><h3>Expected goals (xG)</h3>${lg}
+    <div class="nr-sub">Model estimate built from the shot and chance categories tagged in the match.</div>
+    ${nrRow('xG', xgO, xgA, xgO.toFixed(2), xgA.toFixed(2))}
+    ${nrRow('Goals', game.scoreHome, game.scoreAway)}
+    ${nrRow('xG per shot', shotsO>0?xgO/shotsO:0, shotsA>0?xgA/shotsA:0, shotsO>0?(xgO/shotsO).toFixed(2):'N/A', shotsA>0?(xgA/shotsA).toFixed(2):'N/A')}
+  </div>` : '';
+  const xgRows = Object.keys(XG_MODEL).filter(k=>(+O[k]||0)||(+A[k]||0)).map(k=>{
+    const co=+O[k]||0, ca=+A[k]||0, w=XG_MODEL[k];
+    return `<tr><td>${XG_LABELS[k]} <small>× ${w}</small></td><td class="ca">${co} <span class="nr-fr">→</span> <b>${(co*w).toFixed(2)}</b></td><td>${ca} <span class="nr-fr">→</span> ${(ca*w).toFixed(2)}</td></tr>`;
+  }).join('');
+  const xgTable = xgRows ? `<div class="nr-card"><h3>xG breakdown</h3><div class="nr-sub">Count of tagged events × value per event.</div>
+    <table class="nr-tbl"><tr><th>EVENT</th><th>${oN}</th><th>${pN}</th></tr>${xgRows}
+    <tr><td><b>Total xG</b></td><td class="ca"><b>${xgO.toFixed(2)}</b></td><td><b>${xgA.toFixed(2)}</b></td></tr></table></div>` : '';
+
   const img1 = X.image1_url, img2 = X.image2_url;
   const images = (!img1 && !img2) ? '' : (img1 && img2)
     ? `<div class="report-images two"><img src="${img1}" crossorigin="anonymous"><img src="${img2}" crossorigin="anonymous"></div>`
@@ -1112,6 +1194,21 @@ function renderReport(gameId){
   const notes = (X.notes||'').trim();
   const logo = (t,name)=> t.logo? `<img src="${t.logo}" crossorigin="anonymous">` : `<div class="fallback">${nrEsc((name||'?').slice(0,3).toUpperCase())}</div>`;
 
+  const ew = document.getElementById('extraWrap');
+  if(ew){
+    ew.innerHTML = (passCard||xgCard) ? `<div class="nr nr-extra">
+      <div class="nr-head" style="padding-bottom:12px;">
+        <div class="nr-eyebrow">${nrEsc((game.competition||'MATCH REPORT').toUpperCase())} · PASSING &amp; xG</div>
+        <div class="rep-teams">
+          <div class="rep-team">${logo(own,own.name)}<div class="tname">${oN}</div></div>
+          <div><div class="rep-score">${game.scoreHome} – ${game.scoreAway}</div><div class="rep-date">${fmtDateDMY(game.date)}</div></div>
+          <div class="rep-team">${logo(opp,opp.name)}<div class="tname">${pN}</div></div>
+        </div>
+      </div>
+      <div class="nr-grid">${passCard}${xgCard}</div>
+      ${xgTable}
+      <div class="rep-source">Generated by Match Report Builder</div></div>` : '';
+  }
   wrap.innerHTML = `<div class="nr">
   <div class="nr-page nr-p1">
   <div class="nr-head">
@@ -1354,6 +1451,10 @@ function renderSeasonStats(){
 
 /* ============== EXPORT: PDF (print, light theme) & JPEG ============== */
 function exportPDF(elId){
+  if(elId==='extraWrap'){
+    document.body.classList.add('print-extra');
+    window.addEventListener('afterprint', ()=>document.body.classList.remove('print-extra'), {once:true});
+  }
   window.print();
 }
 function exportImage(elId, filename){
