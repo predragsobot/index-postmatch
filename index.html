@@ -702,6 +702,10 @@ function renderStatsForm(){
   const opp = STATE.opponents.find(o=>o.id===game.opponentId);
   document.getElementById('statsTitle').textContent = `Enter Stats — ${STATE.ownTeam.name} vs ${opp?opp.name:'Opponent'}`;
   let html='';
+  html += `<div class="stat-section"><h3>Import from Nacsport XML</h3>
+    <div class="sub" style="margin-top:-6px;">Upload the exported XML — all statistics, times and the score are calculated and filled in below. You can still edit any number before saving.</div>
+    <input type="file" accept=".xml,text/xml" onchange="importNacsportXML(this)">
+    <div id="xmlStatus" style="font-size:12px;margin:-6px 0 4px;"></div></div>`;
   html += `<div class="stat-section"><h3>Match Score</h3>
     <div class="row">
       <div><label>${STATE.ownTeam.name||'Your Club'} — goals</label><input type="number" id="editScoreHome" value="${game.scoreHome}"></div>
@@ -776,6 +780,88 @@ async function handleImageUpload(input, slot){
   statusEl.textContent = '✓ Image uploaded';
   renderStatsForm();
 }
+/* ============== NACSPORT XML IMPORT ============== */
+/* Timeline codes (rows) in the export:
+   Attack / Build up / 2nd Zone / Att 3rd        = our possession (Attack = umbrella, others = thirds)
+   Defense / Opp Build up / OPP 2nd Zone / OPP Att 3rd = opponent possession
+   Out of Play = ball not in play
+   Labels describing what the possession owner did (Goal, Shots, Cross, Box Entry, Counter, Progressive pass, Throw-in…) count for the owner.
+   Labels describing the DEFENDING side (High/Mid Zone, PRESS, RECOVERIES, RE-PRESS, Triggers, GK Saves, Clearance after a cross) count for the other team. */
+const XML_SEC_DIVISOR = 61;   // zone / ball-in-play fields are stored as seconds/61 (report multiplies by 61)
+function parseNacsport(xmlText){
+  const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+  if(doc.getElementsByTagName('parsererror').length) throw new Error('This is not a valid XML file.');
+  const tx = (el,t)=>{ const n=el.getElementsByTagName(t)[0]; return n? (n.textContent||'').trim() : ''; };
+  const inst = Array.from(doc.getElementsByTagName('instance')).map(el=>({
+    code: tx(el,'code').toLowerCase(),
+    s: parseFloat(tx(el,'start'))||0, e: parseFloat(tx(el,'end'))||0,
+    L: Array.from(el.getElementsByTagName('label')).map(l=>tx(l,'text').toLowerCase())
+  }));
+  if(!inst.length) throw new Error('No instances found — is this a Nacsport XML export?');
+  const rows = (code,need=[],any=null)=> inst.filter(x=>x.code===code && need.every(t=>x.L.includes(t)) && (!any || any.some(t=>x.L.includes(t))));
+  const N  = (...a)=> rows(...a).length;
+  const CL = (code,t)=> inst.filter(x=>x.code===code).reduce((n,x)=>n+x.L.filter(l=>l===t).length,0);
+  const dur = code=> inst.filter(x=>x.code===code).reduce((n,x)=>n+Math.max(0,x.e-x.s),0);
+  const overlap = (list,other)=> list.filter(a=>other.some(b=>a.s<b.e && a.e>b.s)).length;
+  const sec = x=> Math.round(x/XML_SEC_DIVISOR*1000)/1000;
+
+  const side = (P,Q,zones,third,goalL,hz,mz)=>{
+    const o={}, ex={};
+    o.goal_ca = N(P,[goalL,'counter']); o.goal = N(P,[goalL]) - o.goal_ca;
+    o.harmless_shot=N(P,['shot1']); o.dangerous_shot=N(P,['shot2']); o.highly_dangerous_shot=N(P,['shot3']); o.certain_goal_shot=N(P,['shot4']);
+    o.regular_chance=N(P,['c1']); o.great_chance=N(P,['c2']);
+    o.prog_first=N(zones[0],['progressive pass']); o.prog_second=N(zones[1],['progressive pass']);
+    o.zone1_poss=sec(dur(zones[0])); o.zone2_poss=sec(dur(zones[1])); o.zone3_poss=sec(dur(zones[2]));
+    o.counter_attacks=N(P,['counter']); o.counter_final3rd=overlap(rows(P,['counter']), rows(third));
+    o.cross=CL(P,'cross r')+CL(P,'cross l'); o.final3rd_entry=N(third); o.box_entry=N(P,['box entry']);
+    // pressing / recoveries happen on the OTHER side's possession rows
+    o.high_zone=N(Q,[hz]); o.press_high=N(Q,[hz,'press']); o.high_press_recoveries=N(Q,[hz,'recoveries']);
+    o.mid_zone=N(Q,[mz]); o.press_mid=N(Q,[mz,'press']); o.middle_press_recoveries=N(Q,[mz,'recoveries']);
+    o.ball_recoveries_opp_half=N(Q,[],['recoveries','2nd recoveries']);
+    o.repress=N(Q,['re-press']); o.repress_recoveries=N(Q,['re-press'],['recoveries','2nd recoveries']);
+    o.gk_saves=N(Q,['gk saves']); o.clearance_after_cross=N(Q,['clearance after a cross']);
+    o.trigger_press=N(Q,['triggers']); o.trigger_press_recoveries=N(Q,['triggers','recoveries']);
+    o.free_kicks=N(P,['free kick']); o.corner_kick=N(P,['corner kick']); o.red_card=0;
+    ex.throw_ins=N(P,['throw in']);
+    ex.box_left=N(third,['left']); ex.box_center=N(third,['central']); ex.box_right=N(third,['right']);
+    ex.cross_right=CL(P,'cross r'); ex.cross_left=CL(P,'cross l');
+    return {o,ex};
+  };
+  const own = side('attack','defense',['build up','2nd zone','att 3rd'],'att 3rd','goal','high zone','mid zone');
+  const opp = side('defense','attack',['opp build up','opp 2nd zone','opp att 3rd'],'opp att 3rd','goal opp','high zone opp','mid zone opp');
+  const extra={};
+  Object.keys(own.ex).forEach(k=>{ extra[k+'_own']=own.ex[k]; extra[k+'_opp']=opp.ex[k]; });
+  extra.ball_own=sec(dur('attack')); extra.ball_neutral=sec(dur('out of play')); extra.ball_opp=sec(dur('defense'));
+  return {own:own.o, opp:opp.o, extra, scoreOwn:own.o.goal+own.o.goal_ca, scoreOpp:opp.o.goal+opp.o.goal_ca, count:inst.length};
+}
+function fillStatsFromXML(R){
+  const set=(sel,val)=>{ const el=document.querySelector(sel); if(el) el.value=val; };
+  Object.keys(R.own).forEach(k=>set(`#statsForm input[data-side="own"][data-key="${k}"]`, R.own[k]));
+  Object.keys(R.opp).forEach(k=>set(`#statsForm input[data-side="opp"][data-key="${k}"]`, R.opp[k]));
+  EXTRA_FIELDS.forEach(f=>{
+    set(`#statsForm input[data-extra="own"][data-key="${f.key}"]`, R.extra[f.key+'_own']);
+    set(`#statsForm input[data-extra="opp"][data-key="${f.key}"]`, R.extra[f.key+'_opp']);
+  });
+  set('#ballOwn',R.extra.ball_own); set('#ballNeutral',R.extra.ball_neutral); set('#ballOpp',R.extra.ball_opp);
+  set('#editScoreHome',R.scoreOwn); set('#editScoreAway',R.scoreOpp);
+}
+function importNacsportXML(input){
+  const f=input.files && input.files[0]; if(!f) return;
+  const st=document.getElementById('xmlStatus');
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const R=parseNacsport(String(rd.result));
+      fillStatsFromXML(R);
+      st.style.color='#15803d';
+      st.textContent=`✓ Imported ${R.count} tagged moments from ${f.name}. Score read from tags: ${R.scoreOwn}–${R.scoreOpp}. Check the numbers below, then press "Save & Generate Report".`;
+    }catch(err){ st.style.color='#b91c1c'; st.textContent='Import failed: '+err.message; }
+    input.value='';
+  };
+  rd.onerror=()=>{ st.style.color='#b91c1c'; st.textContent='Could not read the file.'; };
+  rd.readAsText(f);
+}
+
 function autoFillScore(){
   const ownGoal = Number(document.querySelector('input[data-side="own"][data-key="goal"]')?.value)||0;
   const ownGoalCA = Number(document.querySelector('input[data-side="own"][data-key="goal_ca"]')?.value)||0;
