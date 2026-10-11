@@ -1014,7 +1014,7 @@ function splitBar(leftVal, midVal, rightVal, leftLabel, midLabel, rightLabel){
 }
 /* ============== REPORT RENDER (v2 — sectioned layout, same colours) ============== */
 function nrEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function nrPct(n,d){ if(!(d>0)) return null; return {txt:(+(n/d*100).toFixed(1))+'%', frac:n+'/'+d}; }
+function nrPct(n,d){ if(!(d>0) || n>d) return null; /* never show a share above 100% */ return {txt:(+(n/d*100).toFixed(1))+'%', frac:n+'/'+d}; }
 function nrP(n,d){ const r=nrPct(n,d); return r?r.txt:'N/A'; }
 function nrRow(label,a,b,at,bt,sub){
   const m=Math.max(a,b,1);
@@ -1028,7 +1028,7 @@ function nrSeg(vals,cls,labels){
 }
 function nrTable(title,h1,h2,rows){
   return `<div class="nr-tblwrap"><div class="nr-tt">${title}</div><table class="nr-tbl"><tr><th></th><th>${h1}</th><th>${h2}</th></tr>
-  ${rows.map(r=>`<tr><td>${r[0]}</td><td class="ca"><b>${r[1]}</b></td><td>${r[2]}</td></tr>`).join('')}</table></div>`;
+  ${rows.filter(r=>!(r[1]==='N/A'&&r[2]==='N/A')).map(r=>`<tr><td>${r[0]}</td><td class="ca"><b>${r[1]}</b></td><td>${r[2]}</td></tr>`).join('')}</table></div>`;
 }
 function renderReport(gameId){
   const game = STATE.games.find(g=>g.id===gameId);
@@ -1090,7 +1090,7 @@ function renderReport(gameId){
     ${nrRow('Build-up',hp1.bu,hp2.bu)}${nrRow('Opp. high zone',hp1.z,hp2.z)}${nrRow('Opp. press',hp1.p,hp2.p)}${nrRow('Opp. recoveries',hp1.r,hp2.r)}
     ${nrTable(`DUEL 1 — ${oN} build-up vs ${pN} high press · DUEL 2 — ${pN} build-up vs ${oN} high press`,duelHead[0],duelHead[1],[
       ['Press rate',nrP(hp1.p,hp1.z),nrP(hp2.p,hp2.z)],['Recovery / press',nrP(hp1.r,hp1.p),nrP(hp2.r,hp2.p)],
-      ['Lost build-ups',nrP(hp1.r,hp1.bu),nrP(hp2.r,hp2.bu)],['High-zone pressure',nrP(hp1.z,hp1.bu),nrP(hp2.z,hp2.bu)]])}
+      ['Lost build-ups',nrP(hp1.r,hp1.bu),nrP(hp2.r,hp2.bu)]])}
     <div class="nr-ct">Middle-third progression vs the opponent's mid press</div>
     ${nrRow('Middle progression',mp1.bu,mp2.bu)}${nrRow('Opp. mid zone',mp1.z,mp2.z)}${nrRow('Opp. press',mp1.p,mp2.p)}${nrRow('Opp. recoveries',mp1.r,mp2.r)}
     ${nrTable(`DUEL 1 — ${oN} middle third vs ${pN} mid press · DUEL 2 — ${pN} middle third vs ${oN} mid press`,duelHead[0],duelHead[1],[
