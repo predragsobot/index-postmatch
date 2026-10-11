@@ -274,6 +274,7 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 
 .nr-page + .nr-page{margin-top:6px;}
 .nr-p2 .report-images{margin-top:14px;}
+.nr .report-images img{width:100%; height:auto; max-height:none; object-fit:contain; align-self:start;}
 @media print{
   .nr{padding:0 !important;}
   .nr-page{break-after:page; page-break-after:always;}
@@ -287,7 +288,7 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
   .nr-p4 .nr-tbl td{padding:2px 0;} .nr-p4 .nr-tbl th{padding:2px 0;} .nr-p4 .nr-ct{margin:6px 0 3px;} .nr-p4 .nr-tblwrap{margin:2px 0 0;}
   .nr-p4 .nr-rl{font-size:10.5px;} .nr-p4 .nr-b em{font-size:11px;} .nr-p4 .nr-tbl{font-size:10.5px;} .nr-p4 .rep-source{padding:2px 0 0;}
   .nr-p3 .nr-tbl td{padding:5px 0;}
-  .nr-p2 .report-images{padding:0 !important; margin-top:12px;} .nr-p2 .report-images img{max-height:560px !important;}
+  .nr-p2 .report-images{padding:0 !important; margin-top:12px; display:grid !important;} .nr-p2 .report-images img{width:100% !important; height:auto !important; max-height:610px !important; object-fit:contain;}
 }
 
 /* ---------- LIGHT EXPORT THEME (white bg, blue accents — used for PDF print & JPEG export) ---------- */
@@ -1156,8 +1157,8 @@ function renderReport(gameId){
   <div class="nr-grid">
     <div class="nr-card"><h3>Attacking actions</h3>${lg}${attack}</div>
     <div class="nr-card"><h3>Defending actions</h3>${lg}${defend}</div>
-  ${images}
   </div>
+  ${images}
   </div>
   <div class="nr-page nr-p3">
   <div class="nr-card"><h3>Index &amp; match quality</h3>
