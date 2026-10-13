@@ -781,12 +781,15 @@ function renderStatsForm(){
   html += `<div class="stat-row"><label>Ball-in-Play Time — Opponent — time (mm.ss)</label>
     <input type="number" step="any" id="ballOpp" value="${game.extra.ball_opp ?? ''}"><div></div></div>`;
   html += `</div>`;
-  html += `<div class="stat-section"><h3>Pass Model (for estimated passes)</h3>
-    <div class="sub" style="margin-top:-6px;">Passes are estimated from time in possession per third. Set the passing tempo and accuracy of each team in this match.</div>
-    <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 14px;align-items:center;font-size:13px;">
-      <span></span><b>Tempo</b><b>Accuracy</b>
-      <span>Your club</span><select id="passOwnTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_own_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select><select id="passOwn" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['same','Same (standard)'],['better','Better'],['top','Top'],['low','Low']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_own||'same')===v?' selected':''}>${l}</option>`).join('')}</select>
-      <span>Opponent</span><select id="passOppTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_opp_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select><select id="passOpp" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['same','Same (standard)'],['better','Better'],['top','Top'],['low','Low']].map(([v,l])=>`<option value="${v}"${(game.extra.pass_opp||'same')===v?' selected':''}>${l}</option>`).join('')}</select>
+  html += `<div class="stat-section"><h3>Passes</h3>
+    <div class="sub" style="margin-top:-6px;">Passes are estimated from possession time (tempo and accuracy follow the possession share). If you have the real totals (e.g. from Wyscout), enter them — the report will use them and keep the model estimate for comparison.</div>
+    <div style="display:grid;grid-template-columns:auto auto auto;gap:8px 14px;align-items:center;font-size:13px;justify-content:start;">
+      <span></span><b>Real passes (optional)</b><span></span>
+      <span>Your club</span><span>attempted <input type="number" min="0" id="refOwnAtt" value="${game.extra.ref_pass_own_att ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"> &nbsp;accurate <input type="number" min="0" id="refOwnOk" value="${game.extra.ref_pass_own_ok ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"></span><span></span>
+      <span>Opponent</span><span>attempted <input type="number" min="0" id="refOppAtt" value="${game.extra.ref_pass_opp_att ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"> &nbsp;accurate <input type="number" min="0" id="refOppOk" value="${game.extra.ref_pass_opp_ok ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"></span><span></span>
+      <span></span><b>Manual correction of the model (leave as is normally)</b><span></span>
+      <span>Your club</span><span>tempo <select id="passOwnTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_own_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select> &nbsp;accuracy <select id="passOwn" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['low','Low'],['same','Same'],['better','Better'],['top','Top']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_own_acc||'same')===v?' selected':''}>${l}</option>`).join('')}</select></span><span></span>
+      <span>Opponent</span><span>tempo <select id="passOppTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_opp_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select> &nbsp;accuracy <select id="passOpp" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['low','Low'],['same','Same'],['better','Better'],['top','Top']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_opp_acc||'same')===v?' selected':''}>${l}</option>`).join('')}</select></span><span></span>
     </div></div>`;
   html += `<div class="stat-section"><h3>Analyst Notes (optional)</h3>
     <textarea id="analystNotes" rows="3" style="width:100%;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;font-family:inherit;" placeholder="Context, data quality remarks, anything worth remembering for this match…">${(game.extra.notes||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea></div>`;
@@ -836,6 +839,7 @@ async function handleImageUpload(input, slot){
    Out of Play = ball not in play
    Labels describing what the possession owner did (Goal, Shots, Cross, Box Entry, Counter, Progressive pass, Throw-in…) count for the owner.
    Labels describing the DEFENDING side (High/Mid Zone, PRESS, RECOVERIES, RE-PRESS, Triggers, GK Saves, Clearance after a cross) count for the other team. */
+const XML_PAD_SEC = 2;        // you add 1 s before + 1 s after every tag: this much is removed from each possession tag (Attack, Defense and the thirds). Out of Play is left as is. Set 0 to disable.
 const XML_SEC_DIVISOR = 61;   // zone / ball-in-play fields are stored as seconds/61 (report multiplies by 61)
 function parseNacsport(xmlText){
   const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
@@ -851,6 +855,7 @@ function parseNacsport(xmlText){
   const N  = (...a)=> rows(...a).length;
   const CL = (code,t)=> inst.filter(x=>x.code===code).reduce((n,x)=>n+x.L.filter(l=>l===t).length,0);
   const dur = code=> inst.filter(x=>x.code===code).reduce((n,x)=>n+Math.max(0,x.e-x.s),0);
+  const durP = code=> inst.filter(x=>x.code===code).reduce((n,x)=>n+Math.max(0,(x.e-x.s)-XML_PAD_SEC),0);   // possession tags, padding removed
   const overlap = (list,other)=> list.filter(a=>other.some(b=>a.s<b.e && a.e>b.s)).length;
   const sec = x=> Math.round(x/XML_SEC_DIVISOR*1000)/1000;
 
@@ -860,7 +865,7 @@ function parseNacsport(xmlText){
     o.harmless_shot=N(P,['shot1']); o.dangerous_shot=N(P,['shot2']); o.highly_dangerous_shot=N(P,['shot3']); o.certain_goal_shot=N(P,['shot4']);
     o.regular_chance=N(P,['c1']); o.great_chance=N(P,['c2']);
     o.prog_first=N(zones[0],['progressive pass']); o.prog_second=N(zones[1],['progressive pass']);
-    o.zone1_poss=sec(dur(zones[0])); o.zone2_poss=sec(dur(zones[1])); o.zone3_poss=sec(dur(zones[2]));
+    o.zone1_poss=sec(durP(zones[0])); o.zone2_poss=sec(durP(zones[1])); o.zone3_poss=sec(durP(zones[2]));
     o.counter_attacks=N(P,['counter']); o.counter_final3rd=overlap(rows(P,['counter']), rows(third));
     o.cross=CL(P,'cross r')+CL(P,'cross l'); o.final3rd_entry=N(third); o.box_entry=N(P,['box entry']);
     // pressing / recoveries happen on the OTHER side's possession rows
@@ -880,7 +885,7 @@ function parseNacsport(xmlText){
   const opp = side('defense','attack',['opp build up','opp 2nd zone','opp att 3rd'],'opp att 3rd','goal opp','high zone opp','mid zone opp');
   const extra={};
   Object.keys(own.ex).forEach(k=>{ extra[k+'_own']=own.ex[k]; extra[k+'_opp']=opp.ex[k]; });
-  extra.ball_own=sec(dur('attack')); extra.ball_neutral=sec(dur('out of play')); extra.ball_opp=sec(dur('defense'));
+  extra.ball_own=sec(durP('attack')); extra.ball_neutral=sec(dur('out of play')); extra.ball_opp=sec(durP('defense'));
   return {own:own.o, opp:opp.o, extra, scoreOwn:own.o.goal+own.o.goal_ca, scoreOpp:opp.o.goal+opp.o.goal_ca, count:inst.length};
 }
 function fillStatsFromXML(R){
@@ -903,7 +908,7 @@ function importNacsportXML(input){
       const R=parseNacsport(String(rd.result));
       fillStatsFromXML(R);
       st.style.color='#15803d';
-      st.textContent=`✓ Imported ${R.count} tagged moments from ${f.name}. Score read from tags: ${R.scoreOwn}–${R.scoreOpp}. Check the numbers below, then press "Save & Generate Report".`;
+      st.textContent=`✓ Imported ${R.count} tagged moments from ${f.name}. Possession tags shortened by ${XML_PAD_SEC} s each. Score read from tags: ${R.scoreOwn}–${R.scoreOpp}. Check the numbers below, then press "Save & Generate Report".`;
     }catch(err){ st.style.color='#b91c1c'; st.textContent='Import failed: '+err.message; }
     input.value='';
   };
@@ -940,7 +945,8 @@ async function saveStats(){
   if(bn) game.extra.ball_neutral = bn.value===''?0:Number(bn.value);
   const bp = document.getElementById('ballOpp');
   if(bp) game.extra.ball_opp = bp.value===''?0:Number(bp.value);
-  [['passOwn','pass_own'],['passOpp','pass_opp'],['passOwnTempo','pass_own_tempo'],['passOppTempo','pass_opp_tempo']].forEach(([id,k])=>{ const e=document.getElementById(id); if(e) game.extra[k]=e.value; });
+  [['passOwn','pass2_own_acc'],['passOpp','pass2_opp_acc'],['passOwnTempo','pass2_own_tempo'],['passOppTempo','pass2_opp_tempo']].forEach(([id,k])=>{ const e=document.getElementById(id); if(e) game.extra[k]=e.value; });
+  [['refOwnAtt','ref_pass_own_att'],['refOwnOk','ref_pass_own_ok'],['refOppAtt','ref_pass_opp_att'],['refOppOk','ref_pass_opp_ok']].forEach(([id,k])=>{ const e=document.getElementById(id); if(e){ if(e.value==='') delete game.extra[k]; else game.extra[k]=Number(e.value); } });
   const an = document.getElementById('analystNotes');
   if(an) game.extra.notes = an.value;
   const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra, score_own:game.scoreHome, score_opp:game.scoreAway }).eq('id', game.id);
@@ -1064,9 +1070,12 @@ function nrTable(title,h1,h2,rows){
 }
 /* ============== PASSING & xG MODELS (edit the numbers here) ============== */
 const PASS_MODEL = {
-  secPerPass: { own:[4.5,5,5.5], opp:[5,5.5,6] },        // seconds of possession per pass, zone 1 / 2 / 3 (normal tempo)
-  tempo:      { slow:1.10, normal:1, fast:0.935 },        // multiplies seconds per pass
-  accuracy:   { same:[.85,.78,.65], better:[.90,.82,.70], top:[.91,.87,.72], low:[.80,.75,.60] }   // pass success rate per zone
+  tempo: 17.1,                                   // passes per minute of REAL possession (Wyscout "match tempo" is about 17.4-17.7)
+  realShare: { base:0.82, slope:0.0075 },        // real possession time / tagged time = base + slope * (possession% - 50)
+  zoneDensity: [0.9, 0.95, 1.35],                // relative passes per second in the 1st / 2nd / 3rd third
+  accuracy: { base:[.91,.86,.69], perShare:0.0017, min:.5, max:.97 },   // success rate per third, +perShare for every possession point above 50%
+  tempoAdj: { slow:0.91, normal:1, fast:1.07 },  // optional manual correction
+  accAdj:   { low:-.04, same:0, better:.03, top:.05 }
 };
 const XG_MODEL = {            // expected goals per tagged event
   harmless_shot:.025, dangerous_shot:.07, highly_dangerous_shot:.14, certain_goal_shot:.45,
@@ -1075,12 +1084,28 @@ const XG_MODEL = {            // expected goals per tagged event
 };
 const XG_LABELS = { harmless_shot:'Harmless shot', dangerous_shot:'Dangerous shot', highly_dangerous_shot:'Highly dangerous shot', certain_goal_shot:'Certain-goal shot',
   goal:'Goal', goal_ca:'Goal (counter attack)', regular_chance:'Regular chance', great_chance:'Great chance' };
-function calcPasses(secs, team, profile, tempo){
-  const mult = PASS_MODEL.tempo[tempo] || 1;
-  const per = PASS_MODEL.secPerPass[team].map(x=>x*mult), acc = PASS_MODEL.accuracy[profile] || PASS_MODEL.accuracy.same;
-  const zones = secs.map((t,i)=>{ const att=(t||0)/per[i]; return {att, ok:att*acc[i]}; });
+function calcPasses(secs, share, tempo, accProfile, ref){
+  const P = PASS_MODEL, tag = secs.reduce((a,b)=>a+(b||0),0);
+  const none = {zones:[0,1,2].map(()=>({att:0,ok:0})), att:0, ok:0, acc:0, model:{att:0,ok:0}, fromRef:false};
+  if(!(tag>0)) return none;
+  const f = Math.min(1, Math.max(.55, P.realShare.base + P.realShare.slope*(share-50)));
+  const total = tag*f/60 * P.tempo * (P.tempoAdj[tempo]||1);
+  const w = secs.map((t,i)=>(t||0)*P.zoneDensity[i]), ws = w.reduce((a,b)=>a+b,0) || 1;
+  const adj = P.accAdj[accProfile] || 0;
+  let zones = secs.map((t,i)=>{
+    const a = Math.min(P.accuracy.max, Math.max(P.accuracy.min, P.accuracy.base[i] + P.accuracy.perShare*(share-50) + adj));
+    const att = total*w[i]/ws; return {att, ok:att*a};
+  });
+  const model = {att:total, ok:zones.reduce((a,z)=>a+z.ok,0)};
+  let fromRef = false;
+  if(ref && ref.att>0 && ref.ok>=0 && ref.ok<=ref.att){          // real totals (e.g. Wyscout): keep the split by third from the model
+    const ka = ref.att/total; zones = zones.map(z=>({att:z.att*ka, ok:z.ok*ka}));
+    const kk = ref.ok/(zones.reduce((a,z)=>a+z.ok,0)||1);
+    zones = zones.map(z=>({att:z.att, ok:Math.min(z.att, z.ok*kk)}));
+    fromRef = true;
+  }
   const att = zones.reduce((a,z)=>a+z.att,0), ok = zones.reduce((a,z)=>a+z.ok,0);
-  return {zones, att, ok, acc: att>0? ok/att*100 : 0};
+  return {zones, att, ok, acc: att>0? ok/att*100 : 0, model, fromRef};
 }
 function calcXG(S){
   return Object.keys(XG_MODEL).reduce((sum,k)=> sum + (Number((S||{})[k])||0)*XG_MODEL[k], 0);
@@ -1160,18 +1185,23 @@ function renderReport(gameId){
 
 
   // passing (estimated from time in possession) and expected goals — printed on a separate page
-  const pfOwn = X.pass_own||'same', pfOpp = X.pass_opp||'same', tpOwn = X.pass_own_tempo||'normal', tpOpp = X.pass_opp_tempo||'normal';
-  const pOwn = calcPasses(R.ownSec,'own',pfOwn,tpOwn), pOpp = calcPasses(R.oppSec,'opp',pfOpp,tpOpp);
+  const pfOwn = X.pass2_own_acc||'same', pfOpp = X.pass2_opp_acc||'same', tpOwn = X.pass2_own_tempo||'normal', tpOpp = X.pass2_opp_tempo||'normal';
+  const refOf = k=>{ const at=Number(X['ref_pass_'+k+'_att']), ok=Number(X['ref_pass_'+k+'_ok']); return (at>0 && ok>=0 && ok<=at)? {att:at, ok} : null; };
+  const pOwn = calcPasses(R.ownSec, R.possOwn, tpOwn, pfOwn, refOf('own')), pOpp = calcPasses(R.oppSec, R.possOpp, tpOpp, pfOpp, refOf('opp'));
   const xgO = calcXG(O), xgA = calcXG(A);
   const shotsO = so.shots, shotsA = sa.shots;
   const r0 = n=>Math.round(n);
   const PL = {same:'Same',better:'Better',top:'Top',low:'Low'}, TL = {slow:'Slow',normal:'Normal',fast:'Fast'};
-  const passCard = (pOwn.att+pOpp.att)>0 ? `<div class="nr-card"><h3>Passing — estimated</h3>${lg}
-    <div class="nr-sub">Estimated from time in possession in each third · shown as attempted / successful.</div>
+  const manual = (tpOwn!=='normal'||pfOwn!=='same'||tpOpp!=='normal'||pfOpp!=='same');
+  const modelNote = (pOwn.fromRef||pOpp.fromRef)
+    ? `Model estimate for comparison: ${oN} ${r0(pOwn.model.att)} / ${r0(pOwn.model.ok)} · ${pN} ${r0(pOpp.model.att)} / ${r0(pOpp.model.ok)}`
+    : `Model: tempo and accuracy follow possession${manual?` · manual adjustment: ${oN} ${TL[tpOwn]}/${PL[pfOwn]}, ${pN} ${TL[tpOpp]}/${PL[pfOpp]}`:''}`;
+  const passCard = (pOwn.att+pOpp.att)>0 ? `<div class="nr-card"><h3>Passing${(pOwn.fromRef&&pOpp.fromRef)?' — Wyscout totals':' — estimated'}</h3>${lg}
+    <div class="nr-sub">${(pOwn.fromRef||pOpp.fromRef)?'Totals from Wyscout · split by third estimated from possession time':'Estimated from possession time in each third'} · attempted / successful.</div>
     ${['DEFENSIVE THIRD','MIDDLE THIRD','ATTACKING THIRD'].map((n,i)=>nrRow(n, pOwn.zones[i].att, pOpp.zones[i].att, `${r0(pOwn.zones[i].att)} / ${r0(pOwn.zones[i].ok)}`, `${r0(pOpp.zones[i].att)} / ${r0(pOpp.zones[i].ok)}`)).join('')}
     ${nrRow('TOTAL PASSES', pOwn.att, pOpp.att, `${r0(pOwn.att)} / ${r0(pOwn.ok)}`, `${r0(pOpp.att)} / ${r0(pOpp.ok)}`)}
     ${nrRow('PASS ACCURACY', pOwn.acc, pOpp.acc, pOwn.acc.toFixed(1)+'%', pOpp.acc.toFixed(1)+'%')}
-    <div class="nr-sub" style="margin:8px 0 0;">Model: ${oN} tempo ${TL[tpOwn]||'Normal'} · accuracy ${PL[pfOwn]||'Same'} &nbsp;|&nbsp; ${pN} tempo ${TL[tpOpp]||'Normal'} · accuracy ${PL[pfOpp]||'Same'}</div>
+    <div class="nr-sub" style="margin:8px 0 0;">${modelNote}</div>
   </div>` : '';
   const xgCard = (xgO+xgA)>0 ? `<div class="nr-card"><h3>Expected goals (xG)</h3>${lg}
     <div class="nr-sub">Model estimate built from the shot and chance categories tagged in the match.</div>
