@@ -111,19 +111,6 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
 .stat-line-bar{display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--navy-700);}
 .stat-line-bar .a{background:var(--blue);}
 .stat-line-bar .b{background:var(--gray);}
-
-.chart-legend{display:flex; gap:16px; padding:4px 16px 2px; font-size:9.5px; font-weight:700; letter-spacing:.03em;}
-.chart-legend span{display:flex; align-items:center; gap:5px;}
-.chart-legend .dot{width:7px; height:7px; border-radius:2px; display:inline-block;}
-.chart-row{padding:1.5px 16px;}
-.chart-row-top{font-size:10.5px; font-weight:600; color:var(--ink-dim); margin-bottom:1px; letter-spacing:.01em;}
-.chart-bar-track{display:flex; align-items:center; height:11px; gap:6px;}
-.chart-bar-track .track-bg{flex:1; height:8px; display:flex; border-radius:3px; overflow:hidden; background:var(--navy-700);}
-.chart-bar-track .track-fill.own{background:var(--blue);}
-.chart-bar-track .track-fill.opp{background:var(--gray);}
-.chart-bar-track .track-val{width:22px; font-size:10.5px; font-weight:700;}
-.chart-bar-track .track-val.own{text-align:right;}
-.chart-bar-track .track-val.opp{text-align:left; color:var(--ink-dim); font-weight:600;}
 .index-band{margin:0 28px 16px; background:var(--navy-700); border-radius:10px; padding:16px 22px; display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:18px; letter-spacing:.05em;}
 .index-band .vals{display:flex; gap:14px; font-size:20px;}
 .index-band .vals span:first-child{color:var(--blue);}
@@ -186,13 +173,6 @@ input:focus, select:focus{outline:2px solid var(--blue); border-color:var(--blue
   .stat-line{ padding:1.5px 12px !important; }
   .stat-line-top{ margin-bottom:0 !important; font-size:10px !important; }
   .stat-line-bar{ height:4px !important; }
-  .chart-legend{ padding:1px 12px 1px !important; font-size:8px !important; gap:8px !important; }
-  .chart-legend .dot{ width:5px !important; height:5px !important; }
-  .chart-row{ padding:0.5px 12px !important; }
-  .chart-row-top{ font-size:8px !important; margin-bottom:0 !important; }
-  .chart-bar-track{ height:6px !important; gap:3px !important; }
-  .chart-bar-track .track-bg{ height:4px !important; }
-  .chart-bar-track .track-val{ width:16px !important; font-size:8px !important; }
   .bottom2{ padding:0 20px 6px !important; gap:10px !important; }
   .bcard{ padding:6px 12px !important; }
   .bcard .lbl{ margin-bottom:4px !important; }
@@ -260,11 +240,6 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 .export-light .stat-line-bar{ background:#E3E7ED !important; }
 .export-light .stat-line-bar .a{ background:#1C56C7 !important; }
 .export-light .stat-line-bar .b{ background:#94A0AC !important; }
-.export-light .chart-bar-track .track-bg{ background:#E3E7ED !important; }
-.export-light .chart-bar-track .track-fill.own{ background:#1C56C7 !important; }
-.export-light .chart-bar-track .track-fill.opp{ background:#94A0AC !important; }
-.export-light .chart-row-top{ color:#5b6b7c !important; }
-.export-light .chart-bar-track .track-val.opp{ color:#5b6b7c !important; }
 .export-light .index-band{ background:#E6EDFB !important; color:#0A1F3D !important; }
 .export-light .index-band .vals span:first-child{ color:#1C56C7 !important; }
 .export-light .index-band .vals span:last-child{ color:#94A0AC !important; }
@@ -285,6 +260,101 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
 .export-light table.szn tr.avg-row td{ color:#1C56C7 !important; border-top-color:#1C56C7 !important; }
 .export-light .opp-card .otier{ color:#B8860B !important; }
 .export-light .tag-tier{ background:#E6EDFB !important; color:#1C56C7 !important; }
+
+/* ---------- REPORT v2 (sectioned layout, same dark palette) ---------- */
+#reportWrap{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+.nr{padding:18px 22px 8px;}
+.nr .ca{color:var(--blue);} .nr .cb{color:var(--ink-dim);} .nr .cg{color:var(--gray);}
+.nr-head{padding:10px 4px 18px;}
+.nr-eyebrow{font-size:13px; letter-spacing:.15em; color:var(--ink-dim); font-weight:700; margin-bottom:12px;}
+.nr-id{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin-top:18px;}
+.nr-f{background:var(--navy-700); border-radius:8px; padding:8px 10px; font-size:13px; font-weight:600;}
+.nr-f span{display:block; font-size:10px; letter-spacing:.12em; color:var(--ink-dim); text-transform:uppercase; font-weight:600;}
+.nr-card{background:var(--navy-800); border-radius:12px; padding:16px 18px; margin-bottom:14px; break-inside:avoid;}
+.nr-card h3{margin:0 0 12px; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink);}
+.nr-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+.nr-grid .nr-card{margin-bottom:0;}
+.nr-card .nr-grid{margin-bottom:0;}
+@media(max-width:720px){.nr-grid{grid-template-columns:1fr;}}
+.nr-sub{font-size:11px; color:var(--ink-dim); margin:-6px 0 12px;}
+.nr-lg{display:flex; gap:14px; font-size:11px; color:var(--ink-dim); margin:10px 0;}
+.nr-lg i{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px;}
+.nr i.a, .nr-lg i.a{background:var(--blue);} .nr i.b, .nr-lg i.b{background:var(--gray);}
+.nr-pb{display:flex; height:26px; border-radius:13px; overflow:hidden; background:var(--navy-700); font-size:12px; font-weight:700;}
+.nr-pb div{display:flex; align-items:center; padding:0 10px;}
+.nr-pb .a{background:var(--blue); color:#03202e;} .nr-pb .b{background:var(--gray); color:#fff; justify-content:flex-end;}
+.nr-t3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; text-align:center;}
+.nr-t3 div{background:var(--navy-700); border-radius:8px; padding:10px 6px;}
+.nr-t3 b{font-size:22px; display:block;} .nr-t3 span{font-size:10px; letter-spacing:.1em; color:var(--ink-dim);}
+.nr-r{margin-bottom:11px;}
+.nr-rl{display:flex; justify-content:space-between; gap:8px; font-size:12.5px; font-weight:600;}
+.nr-rl small{color:var(--ink-dim); font-size:10px; font-weight:400; text-align:right;}
+.nr-b{display:flex; align-items:center; gap:8px; margin-top:3px;}
+.nr-b u{flex:1; height:6px; background:var(--navy-700); border-radius:3px; overflow:hidden; text-decoration:none;}
+.nr-b u i{display:block; height:100%; border-radius:3px;}
+.nr-b em{font-style:normal; font-size:12.5px; min-width:48px; text-align:right; font-weight:700;}
+.nr-st{font-size:10px; letter-spacing:.06em; color:var(--ink-dim); font-weight:700; margin-top:6px;}
+.nr-seg{display:flex; height:24px; border-radius:6px; overflow:hidden; background:var(--navy-700); margin:3px 0 2px; font-size:12px; font-weight:700; color:#03202e;}
+.nr-seg div{display:flex; align-items:center; justify-content:center;}
+.nr-seg .a{background:var(--blue);} .nr-seg .b{background:var(--gray); color:#fff;} .nr-seg .c{background:var(--gold);}
+.nr-ax{display:flex; justify-content:space-between; font-size:10px; color:var(--ink-dim); margin-bottom:10px;}
+.nr-big{display:flex; justify-content:space-between; align-items:center; background:var(--navy-700); border-radius:8px; padding:12px 16px; margin-bottom:8px; font-weight:800; font-size:15px; letter-spacing:.06em;}
+.nr-big .vals{display:flex; gap:14px; font-size:20px;}
+.nr-q{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-top:10px;}
+.nr-q div{background:var(--navy-700); border-radius:8px; padding:12px 14px; font-size:10px; letter-spacing:.08em; color:var(--ink-dim); font-weight:700;}
+.nr-q b{display:block; font-size:26px; margin-top:6px; letter-spacing:0; font-weight:800;}
+.nr-note{border:1px dashed var(--navy-700); border-radius:8px; padding:12px; font-size:13px; white-space:pre-wrap; color:var(--ink);}
+.nr-tbl{width:100%; border-collapse:collapse; font-size:12px;}
+.nr-tbl th{font-size:10px; letter-spacing:.1em; color:var(--ink-dim); text-align:right; font-weight:600; padding:4px 0;}
+.nr-tbl td{padding:7px 0; border-top:1px solid var(--navy-700); text-align:right;}
+.nr-tbl th:first-child, .nr-tbl td:first-child{text-align:left;}
+.nr-tbl td small{color:var(--ink-dim); font-size:11px;} .nr-fr{color:var(--ink-dim); font-size:11px;}
+.nr-ct{font-size:12px; font-weight:700; color:var(--blue); margin:14px 0 8px; letter-spacing:.03em;}
+.nr-tblwrap{margin:6px 0 4px;} .nr-tt{font-size:10px; color:var(--ink-dim); margin-bottom:2px;}
+.nr .report-images{padding:0 0 14px;}
+.nr .rep-source{padding-bottom:10px;}
+@media print{ .nr-card{break-inside:avoid;} .nr-r{break-inside:avoid;} }
+
+
+.nr-page + .nr-page{margin-top:6px;}
+.nr-p2 .report-images{margin-top:14px;}
+.nr .report-images img{width:100%; height:auto; max-height:none; object-fit:contain; align-self:start;}
+@media print{
+  .nr{padding:0 !important;}
+  .nr-page{break-after:page; page-break-after:always;}
+  .nr-page:last-child{break-after:auto; page-break-after:auto;}
+  .nr-p2 .nr-grid{grid-template-columns:1fr 1fr !important; gap:12px !important;}
+  .nr-p2 .nr-card{padding:14px 14px;} .nr-p2 .nr-r{margin-bottom:9px;}
+  .nr-card .nr-grid{grid-template-columns:1fr 1fr !important;}
+  .nr-p1 .nr-head{padding:4px 4px 10px;}
+  .nr-p4 .nr-card{padding:10px 12px; margin-bottom:6px;} .nr-p4 .nr-card h3{margin-bottom:6px;} .nr-p4 .nr-sub{margin-bottom:6px;}
+  .nr-p4 .nr-r{margin-bottom:2px;} .nr-p4 .nr-b{margin-top:0;} .nr-p4 .nr-b u{height:5px;}
+  .nr-p4 .nr-tbl td{padding:2px 0;} .nr-p4 .nr-tbl th{padding:2px 0;} .nr-p4 .nr-ct{margin:6px 0 3px;} .nr-p4 .nr-tblwrap{margin:2px 0 0;}
+  .nr-p4 .nr-rl{font-size:10.5px;} .nr-p4 .nr-b em{font-size:11px;} .nr-p4 .nr-tbl{font-size:10.5px;} .nr-p4 .rep-source{padding:2px 0 0;}
+  .nr-p3 .nr-grid{grid-template-columns:1fr 1fr !important; gap:10px !important; margin-bottom:10px;}
+  .nr-p3 .nr-card{padding:12px 14px; margin-bottom:10px;} .nr-p3 .nr-card h3{margin-bottom:8px;}
+  .nr-p3 .nr-grid .nr-card{margin-bottom:0;}
+  .nr-p3 .nr-big{padding:8px 14px; margin-bottom:6px;} .nr-p3 .nr-big .vals{font-size:18px;}
+  .nr-p3 .nr-q{grid-template-columns:repeat(4,1fr); gap:8px; margin-top:6px;} .nr-p3 .nr-q div{padding:8px 10px; font-size:9px;} .nr-p3 .nr-q b{font-size:19px; margin-top:3px;}
+  .nr-p3 .nr-r{margin-bottom:8px;} .nr-p3 .nr-tbl td{padding:4px 0;} .nr-p3 .nr-sub{margin-bottom:8px;}
+  .nr-p2 .report-images{padding:0 !important; margin-top:12px; display:grid !important;} .nr-p2 .report-images img{width:100% !important; height:auto !important; max-height:610px !important; object-fit:contain;}
+}
+
+#extraWrap{background:var(--navy-900); border-radius:16px; overflow:hidden; color:var(--ink); font-family:'Segoe UI',sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+.extra-label{margin:22px 0 8px; font-size:11px; letter-spacing:.12em; color:#6b7a90; font-weight:700;}
+.nr-extra .nr-card{break-inside:avoid;}
+@media print{
+  .extra-label{display:none !important;}
+  #extraWrap{display:none !important;}
+  body.print-extra #reportWrap{display:none !important;}
+  body.print-extra #extraWrap{display:block !important; visibility:visible; position:absolute; top:0; left:0; width:100%; border-radius:0;}
+  body.print-extra #extraWrap *{visibility:visible;}
+  .nr-extra .nr-grid{grid-template-columns:1fr 1fr !important; gap:10px !important; margin-bottom:10px;}
+  .nr-extra .nr-grid .nr-card{margin-bottom:0;}
+}
+
+@page extra{size:A4 portrait; margin:8mm;}
+@media print{ body.print-extra #extraWrap{page:extra;} }
 
 @media print{
   body *{visibility:hidden;}
@@ -422,10 +492,14 @@ table.szn tr.avg-row td{font-weight:800; border-top:2px solid var(--blue); borde
   <div class="actions-bar">
     <button class="btn secondary" onclick="exportPDF('reportWrap')">⬇ Export to PDF</button>
     <button class="btn secondary" onclick="exportImage('reportWrap','match-report')">⬇ Export as JPEG</button>
+    <button class="btn secondary" onclick="exportPDF('extraWrap')">⬇ Passing &amp; xG — PDF</button>
+    <button class="btn secondary" onclick="exportImage('extraWrap','passing-xg')">⬇ Passing &amp; xG — JPEG</button>
     <button class="btn secondary" onclick="editCurrentGame()">✎ Edit This Report</button>
     <button class="btn danger" onclick="deleteCurrentGame()">🗑 Delete This Report</button>
   </div>
   <div id="reportWrap" class="printable"><div class="empty">No report yet — create a game and enter stats first.</div></div>
+  <div class="extra-label">PASSING &amp; xG — printed separately (use the “Passing &amp; xG” buttons above)</div>
+  <div id="extraWrap"></div>
 </div>
 
 <!-- OPPONENTS OVERVIEW -->
@@ -712,6 +786,16 @@ function renderStatsForm(){
   html += `<div class="stat-row"><label>Ball-in-Play Time — Opponent — time (mm.ss)</label>
     <input type="number" step="any" id="ballOpp" value="${game.extra.ball_opp ?? ''}"><div></div></div>`;
   html += `</div>`;
+  html += `<div class="stat-section"><h3>Passes</h3>
+    <div class="sub" style="margin-top:-6px;">Passes are estimated from possession time (tempo and accuracy follow the possession share). If you have the real totals (e.g. from Wyscout), enter them — the report will use them and keep the model estimate for comparison.</div>
+    <div style="display:grid;grid-template-columns:auto auto auto;gap:8px 14px;align-items:center;font-size:13px;justify-content:start;">
+      <span></span><b>Real passes (optional)</b><span></span>
+      <span>Your club</span><span>attempted <input type="number" min="0" id="refOwnAtt" value="${game.extra.ref_pass_own_att ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"> &nbsp;accurate <input type="number" min="0" id="refOwnOk" value="${game.extra.ref_pass_own_ok ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"></span><span></span>
+      <span>Opponent</span><span>attempted <input type="number" min="0" id="refOppAtt" value="${game.extra.ref_pass_opp_att ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"> &nbsp;accurate <input type="number" min="0" id="refOppOk" value="${game.extra.ref_pass_opp_ok ?? ''}" style="width:90px;padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;"></span><span></span>
+      <span></span><b>Manual correction of the model (leave as is normally)</b><span></span>
+      <span>Your club</span><span>tempo <select id="passOwnTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_own_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select> &nbsp;accuracy <select id="passOwn" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['low','Low'],['same','Same'],['better','Better'],['top','Top']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_own_acc||'same')===v?' selected':''}>${l}</option>`).join('')}</select></span><span></span>
+      <span>Opponent</span><span>tempo <select id="passOppTempo" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['slow','Slow'],['normal','Normal'],['fast','Fast']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_opp_tempo||'normal')===v?' selected':''}>${l}</option>`).join('')}</select> &nbsp;accuracy <select id="passOpp" style="padding:8px 10px;border:1px solid #D7DEE6;border-radius:8px;font-size:14px;">${[['low','Low'],['same','Same'],['better','Better'],['top','Top']].map(([v,l])=>`<option value="${v}"${(game.extra.pass2_opp_acc||'same')===v?' selected':''}>${l}</option>`).join('')}</select></span><span></span>
+    </div></div>`;
   html += `<div class="stat-section"><h3>Report Images (optional — page 2)</h3>
     <div class="sub" style="margin-top:-6px;">Upload straight from your computer — one big image, or two side by side.</div>
     <div class="row">
@@ -842,9 +926,8 @@ function buildStatsFromNacsport(instances){
   own.trigger_press = countLabel(instances,'Defense','Triggers');
   opp.trigger_press = countLabel(instances,'Attack','Triggers');
 
-  const countFK = code => instances.filter(i=>i.code===code && i.labels.some(l=>/free\s*kick/i.test(l))).length;
-  own.free_kicks = countFK('Attack');
-  opp.free_kicks = countFK('Defense');
+  own.free_kicks = countLabel(instances,'Attack','free kick') + countLabel(instances,'Attack','direct free kick');
+  opp.free_kicks = countLabel(instances,'Defense','free kick') + countLabel(instances,'Defense','direct free kick');
   own.corner_kick = countLabel(instances,'Attack','corner kick');
   opp.corner_kick = countLabel(instances,'Defense','corner kick');
 
@@ -945,6 +1028,8 @@ async function saveStats(){
   if(bn) game.extra.ball_neutral = bn.value===''?0:Number(bn.value);
   const bp = document.getElementById('ballOpp');
   if(bp) game.extra.ball_opp = bp.value===''?0:Number(bp.value);
+  [['passOwn','pass2_own_acc'],['passOpp','pass2_opp_acc'],['passOwnTempo','pass2_own_tempo'],['passOppTempo','pass2_opp_tempo']].forEach(([id,k])=>{ const e=document.getElementById(id); if(e) game.extra[k]=e.value; });
+  [['refOwnAtt','ref_pass_own_att'],['refOwnOk','ref_pass_own_ok'],['refOppAtt','ref_pass_opp_att'],['refOppOk','ref_pass_opp_ok']].forEach(([id,k])=>{ const e=document.getElementById(id); if(e){ if(e.value==='') delete game.extra[k]; else game.extra[k]=Number(e.value); } });
   const { error } = await sb.from('games').update({ own_stats:game.own, opp_stats:game.opp, extra:game.extra, score_own:game.scoreHome, score_opp:game.scoreAway }).eq('id', game.id);
   if(error){ alert('Error saving stats: '+error.message); return; }
   renderReport(game.id);
@@ -1046,29 +1131,115 @@ function splitBar(leftVal, midVal, rightVal, leftLabel, midLabel, rightLabel){
     <div class="split-legend"><span>${leftLabel}</span><span>${midLabel}</span><span>${rightLabel}</span></div>
   </div>`;
 }
-function renderStatChart(ownName, oppName, rows){
-  return `<div class="chart-legend">
-      <span><span class="dot" style="background:var(--blue);"></span>${(ownName||'US').toUpperCase()}</span>
-      <span><span class="dot" style="background:var(--gray);"></span>${(oppName||'OPPONENT').toUpperCase()}</span>
-    </div>` +
-    rows.map(r=>{
-      const total = Math.max(0.0001, r.ownScale + r.oppScale);
-      const ownPct = Math.max(4, r.ownScale/total*100);
-      const oppPct = Math.max(4, 100-ownPct);
-      return `<div class="chart-row">
-        <div class="chart-row-top"><span>${r.label}</span></div>
-        <div class="chart-bar-track">
-          <div class="track-val own">${r.ownDisplay}</div>
-          <div class="track-bg"><div class="track-fill own" style="width:${ownPct}%;"></div><div class="track-fill opp" style="width:${oppPct}%;"></div></div>
-          <div class="track-val opp">${r.oppDisplay}</div>
-        </div>
-      </div>`;
-    }).join('');
+function nrEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function nrRow(label,a,b,at,bt,sub){
+  const m=Math.max(a,b,1);
+  return `<div class="nr-r"><div class="nr-rl"><span>${label}</span>${sub?`<small>${sub}</small>`:''}</div>
+  <div class="nr-b"><u><i class="a" style="width:${Math.min(100,a/m*100)}%"></i></u><em class="ca">${at==null?a:at}</em></div>
+  <div class="nr-b"><u><i class="b" style="width:${Math.min(100,b/m*100)}%"></i></u><em class="cb">${bt==null?b:bt}</em></div></div>`;
+}
+/* ============== PASSING & xG MODELS (edit the numbers here) ============== */
+const PASS_MODEL = {
+  tempo: 17.1,                                   // passes per minute of REAL possession (Wyscout "match tempo" is about 17.4-17.7)
+  realShare: { base:0.82, slope:0.0075 },        // real possession time / tagged time = base + slope * (possession% - 50)
+  zoneDensity: [0.9, 0.95, 1.35],                // relative passes per second in the 1st / 2nd / 3rd third
+  accuracy: { base:[.91,.86,.69], perShare:0.0017, min:.5, max:.97 },   // success rate per third, +perShare for every possession point above 50%
+  tempoAdj: { slow:0.91, normal:1, fast:1.07 },  // optional manual correction
+  accAdj:   { low:-.04, same:0, better:.03, top:.05 }
+};
+const XG_MODEL = {            // expected goals per tagged event
+  harmless_shot:.025, dangerous_shot:.07, highly_dangerous_shot:.14, certain_goal_shot:.45,
+  goal:.22, goal_ca:.30,      // scored shots (counter-attack goal a bit higher)
+  regular_chance:.07, great_chance:.22   // chances without a shot
+};
+const XG_LABELS = { harmless_shot:'Harmless shot', dangerous_shot:'Dangerous shot', highly_dangerous_shot:'Highly dangerous shot', certain_goal_shot:'Certain-goal shot',
+  goal:'Goal', goal_ca:'Goal (counter attack)', regular_chance:'Regular chance', great_chance:'Great chance' };
+function calcPasses(secs, share, tempo, accProfile, ref){
+  const P = PASS_MODEL, tag = secs.reduce((a,b)=>a+(b||0),0);
+  const none = {zones:[0,1,2].map(()=>({att:0,ok:0})), att:0, ok:0, acc:0, model:{att:0,ok:0}, fromRef:false};
+  if(!(tag>0)) return none;
+  const f = Math.min(1, Math.max(.55, P.realShare.base + P.realShare.slope*(share-50)));
+  const total = tag*f/60 * P.tempo * (P.tempoAdj[tempo]||1);
+  const w = secs.map((t,i)=>(t||0)*P.zoneDensity[i]), ws = w.reduce((a,b)=>a+b,0) || 1;
+  const adj = P.accAdj[accProfile] || 0;
+  let zones = secs.map((t,i)=>{
+    const a = Math.min(P.accuracy.max, Math.max(P.accuracy.min, P.accuracy.base[i] + P.accuracy.perShare*(share-50) + adj));
+    const att = total*w[i]/ws; return {att, ok:att*a};
+  });
+  const model = {att:total, ok:zones.reduce((a,z)=>a+z.ok,0)};
+  let fromRef = false;
+  if(ref && ref.att>0 && ref.ok>=0 && ref.ok<=ref.att){          // real totals (e.g. Wyscout): keep the split by third from the model
+    const ka = ref.att/total; zones = zones.map(z=>({att:z.att*ka, ok:z.ok*ka}));
+    const kk = ref.ok/(zones.reduce((a,z)=>a+z.ok,0)||1);
+    zones = zones.map(z=>({att:z.att, ok:Math.min(z.att, z.ok*kk)}));
+    fromRef = true;
+  }
+  const att = zones.reduce((a,z)=>a+z.att,0), ok = zones.reduce((a,z)=>a+z.ok,0);
+  return {zones, att, ok, acc: att>0? ok/att*100 : 0, model, fromRef};
+}
+function calcXG(S){
+  return Object.keys(XG_MODEL).reduce((sum,k)=> sum + (Number((S||{})[k])||0)*XG_MODEL[k], 0);
+}
+function renderExtra(game){
+  const ew = document.getElementById('extraWrap');
+  if(!ew) return;
+  if(!game){ ew.innerHTML=''; return; }
+  const R = computeReport(game), opp = R.opp, own = STATE.ownTeam;
+  const O = game.own, A = game.opp, X = game.extra || {};
+  const oN = nrEsc((own.name||'YOUR CLUB').toUpperCase()), pN = nrEsc((opp.name||'OPPONENT').toUpperCase());
+  const shots = S => ['harmless_shot','dangerous_shot','highly_dangerous_shot','certain_goal_shot','goal','goal_ca'].reduce((a,k)=>a+v(S,k),0);
+  const shotsO = shots(O), shotsA = shots(A);
+  const lg = `<div class="nr-lg"><span><i class="a"></i>${oN}</span><span><i class="b"></i>${pN}</span></div>`;
+  const pfOwn = X.pass2_own_acc||'same', pfOpp = X.pass2_opp_acc||'same', tpOwn = X.pass2_own_tempo||'normal', tpOpp = X.pass2_opp_tempo||'normal';
+  const refOf = k=>{ const at=Number(X['ref_pass_'+k+'_att']), ok=Number(X['ref_pass_'+k+'_ok']); return (at>0 && ok>=0 && ok<=at)? {att:at, ok} : null; };
+  const pOwn = calcPasses(R.ownSec, R.possOwn, tpOwn, pfOwn, refOf('own')), pOpp = calcPasses(R.oppSec, R.possOpp, tpOpp, pfOpp, refOf('opp'));
+  const xgO = calcXG(O), xgA = calcXG(A);
+  const r0 = n=>Math.round(n);
+  const PL = {same:'Same',better:'Better',top:'Top',low:'Low'}, TL = {slow:'Slow',normal:'Normal',fast:'Fast'};
+  const manual = (tpOwn!=='normal'||pfOwn!=='same'||tpOpp!=='normal'||pfOpp!=='same');
+  const modelNote = (pOwn.fromRef||pOpp.fromRef)
+    ? `Model estimate for comparison: ${oN} ${r0(pOwn.model.att)} / ${r0(pOwn.model.ok)} · ${pN} ${r0(pOpp.model.att)} / ${r0(pOpp.model.ok)}`
+    : `Model: tempo and accuracy follow possession${manual?` · manual adjustment: ${oN} ${TL[tpOwn]}/${PL[pfOwn]}, ${pN} ${TL[tpOpp]}/${PL[pfOpp]}`:''}`;
+  const passCard = (pOwn.att+pOpp.att)>0 ? `<div class="nr-card"><h3>Passing${(pOwn.fromRef&&pOpp.fromRef)?' — Wyscout totals':' — estimated'}</h3>${lg}
+    <div class="nr-sub">${(pOwn.fromRef||pOpp.fromRef)?'Totals from Wyscout · split by third estimated from possession time':'Estimated from possession time in each third'} · attempted / successful.</div>
+    ${['DEFENSIVE THIRD','MIDDLE THIRD','ATTACKING THIRD'].map((n,i)=>nrRow(n, pOwn.zones[i].att, pOpp.zones[i].att, `${r0(pOwn.zones[i].att)} / ${r0(pOwn.zones[i].ok)}`, `${r0(pOpp.zones[i].att)} / ${r0(pOpp.zones[i].ok)}`)).join('')}
+    ${nrRow('TOTAL PASSES', pOwn.att, pOpp.att, `${r0(pOwn.att)} / ${r0(pOwn.ok)}`, `${r0(pOpp.att)} / ${r0(pOpp.ok)}`)}
+    ${nrRow('PASS ACCURACY', pOwn.acc, pOpp.acc, pOwn.acc.toFixed(1)+'%', pOpp.acc.toFixed(1)+'%')}
+    <div class="nr-sub" style="margin:8px 0 0;">${modelNote}</div>
+  </div>` : '';
+  const xgCard = (xgO+xgA)>0 ? `<div class="nr-card"><h3>Expected goals (xG)</h3>${lg}
+    <div class="nr-sub">Model estimate built from the shot and chance categories tagged in the match.</div>
+    ${nrRow('xG', xgO, xgA, xgO.toFixed(2), xgA.toFixed(2))}
+    ${nrRow('Goals', game.scoreHome, game.scoreAway)}
+    ${nrRow('xG per shot', shotsO>0?xgO/shotsO:0, shotsA>0?xgA/shotsA:0, shotsO>0?(xgO/shotsO).toFixed(2):'N/A', shotsA>0?(xgA/shotsA).toFixed(2):'N/A')}
+  </div>` : '';
+  const xgRows = Object.keys(XG_MODEL).filter(k=>(+O[k]||0)||(+A[k]||0)).map(k=>{
+    const co=+O[k]||0, ca=+A[k]||0, w=XG_MODEL[k];
+    return `<tr><td>${XG_LABELS[k]} <small>× ${w}</small></td><td class="ca">${co} <span class="nr-fr">→</span> <b>${(co*w).toFixed(2)}</b></td><td>${ca} <span class="nr-fr">→</span> ${(ca*w).toFixed(2)}</td></tr>`;
+  }).join('');
+  const xgTable = xgRows ? `<div class="nr-card"><h3>xG breakdown</h3><div class="nr-sub">Count of tagged events × value per event.</div>
+    <table class="nr-tbl"><tr><th>EVENT</th><th>${oN}</th><th>${pN}</th></tr>${xgRows}
+    <tr><td><b>Total xG</b></td><td class="ca"><b>${xgO.toFixed(2)}</b></td><td><b>${xgA.toFixed(2)}</b></td></tr></table></div>` : '';
+
+  const logo = (t,name)=> t.logo? `<img src="${t.logo}" crossorigin="anonymous">` : `<div class="fallback">${nrEsc((name||'?').slice(0,3).toUpperCase())}</div>`;
+  ew.innerHTML = (passCard||xgCard) ? `<div class="nr nr-extra">
+    <div class="nr-head" style="padding-bottom:12px;">
+      <div class="nr-eyebrow">${nrEsc((game.competition||'MATCH REPORT').toUpperCase())} · PASSING &amp; xG</div>
+      <div class="rep-teams">
+        <div class="rep-team">${logo(own,own.name)}<div class="tname">${oN}</div></div>
+        <div><div class="rep-score">${game.scoreHome} – ${game.scoreAway}</div><div class="rep-date">${fmtDateDMY(game.date)}</div></div>
+        <div class="rep-team">${logo(opp,opp.name)}<div class="tname">${pN}</div></div>
+      </div>
+    </div>
+    <div class="nr-grid">${passCard}${xgCard}</div>
+    ${xgTable}
+    <div class="rep-source">Generated by Match Report Builder</div></div>` : '<div class="empty">No passing / xG data yet — enter possession times and shots first.</div>';
 }
 function renderReport(gameId){
   const game = STATE.games.find(g=>g.id===gameId);
   const wrap = document.getElementById('reportWrap');
-  if(!game){ wrap.innerHTML = '<div class="empty">No report yet — create a game and enter stats first.</div>'; return; }
+  if(!game){ wrap.innerHTML = '<div class="empty">No report yet — create a game and enter stats first.</div>'; renderExtra(null); return; }
+  try{ renderExtra(game); }catch(e){ console.error('Passing & xG render failed', e); }
   const R = computeReport(game);
   const opp = R.opp;
   const own = STATE.ownTeam;
@@ -1140,22 +1311,22 @@ function renderReport(gameId){
   <div class="grid2">
     <div class="stat-card">
       <div class="stat-card-head">ATTACKING ACTIONS</div>
-      ${renderStatChart(own.name, opp.name, attackRows)}
+      ${attackRows.map(r=>barLine(r.label, r.ownDisplay, r.oppDisplay, r.ownScale, r.oppScale)).join('')}
     </div>
     <div class="stat-card">
       <div class="stat-card-head">DEFENDING ACTIONS</div>
-      ${renderStatChart(own.name, opp.name, defendRows)}
+      ${defendRows.map(r=>barLine(r.label, r.ownDisplay, r.oppDisplay, r.ownScale, r.oppScale)).join('')}
     </div>
   </div>
 
   <div class="bottom2">
     <div class="bcard">
       <div class="lbl">POSSESSION TIME BY PITCH THIRD</div>
-      ${renderStatChart(own.name, opp.name, [
-        {label:'DEFENSIVE', ownDisplay:fmtSec(R.ownSec[0]), oppDisplay:fmtSec(R.oppSec[0]), ownScale:R.ownSec[0], oppScale:R.oppSec[0]},
-        {label:'MIDDLE', ownDisplay:fmtSec(R.ownSec[1]), oppDisplay:fmtSec(R.oppSec[1]), ownScale:R.ownSec[1], oppScale:R.oppSec[1]},
-        {label:'ATTACKING', ownDisplay:fmtSec(R.ownSec[2]), oppDisplay:fmtSec(R.oppSec[2]), ownScale:R.ownSec[2], oppScale:R.oppSec[2]},
-      ])}
+      <div class="thirds-row">
+        <div class="tcol"><div class="n">DEFENSIVE</div><div class="v">${fmtSec(R.ownSec[0])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[0])}</div></div>
+        <div class="tcol"><div class="n">MIDDLE</div><div class="v">${fmtSec(R.ownSec[1])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[1])}</div></div>
+        <div class="tcol"><div class="n">ATTACKING</div><div class="v">${fmtSec(R.ownSec[2])}</div><div class="v" style="color:var(--gray);">${fmtSec(R.oppSec[2])}</div></div>
+      </div>
     </div>
     <div class="bcard">
       <div class="lbl">TIME IN POSSESSION</div>
@@ -1174,10 +1345,10 @@ function renderReport(gameId){
 
   <div class="footbar">
     <div class="lbl">SET PIECES &amp; ENTRIES</div>
-    ${renderStatChart(own.name, opp.name, [
-      {label:'THROW-INS', ownDisplay:String(game.extra.throw_ins_own||0), oppDisplay:String(game.extra.throw_ins_opp||0), ownScale:game.extra.throw_ins_own||0, oppScale:game.extra.throw_ins_opp||0},
-      {label:'FREE KICKS / CORNERS', ownDisplay:`${game.own.free_kicks||0}/${game.own.corner_kick||0}`, oppDisplay:`${game.opp.free_kicks||0}/${game.opp.corner_kick||0}`, ownScale:(game.own.free_kicks||0)+(game.own.corner_kick||0), oppScale:(game.opp.free_kicks||0)+(game.opp.corner_kick||0)},
-    ])}
+    <div class="fb-grid">
+      <div class="fb-item"><div class="n">THROW-INS</div><div class="vals"><span class="a">${game.extra.throw_ins_own||0}</span><span class="b">${game.extra.throw_ins_opp||0}</span></div></div>
+      <div class="fb-item"><div class="n">FREE KICKS / CORNERS</div><div class="vals"><span class="a">${game.own.free_kicks||0}/${game.own.corner_kick||0}</span><span class="b">${game.opp.free_kicks||0}/${game.opp.corner_kick||0}</span></div></div>
+    </div>
     <div class="grid2" style="padding:14px 0 0;">
       <div>
         <div class="n" style="font-size:10px;color:var(--ink-dim);font-weight:700;margin-bottom:4px;">FINAL 3RD ENTRIES L / C / R — ${(own.name||'US').toUpperCase()}</div>
@@ -1387,12 +1558,28 @@ function renderSeasonStats(){
 
 /* ============== EXPORT: PDF (print, light theme) & JPEG ============== */
 function exportPDF(elId){
+  if(elId==='extraWrap'){
+    document.body.classList.add('print-extra');
+    window.addEventListener('afterprint', ()=>document.body.classList.remove('print-extra'), {once:true});
+    window.print();
+    return;
+  }
   const el = document.getElementById(elId);
   el.classList.add('export-light');
   window.print();
   setTimeout(()=> el.classList.remove('export-light'), 500);
 }
 function exportImage(elId, filename){
+  if(elId==='extraWrap'){
+    const ex = document.getElementById(elId);
+    html2canvas(ex, {backgroundColor:'#0E1F38', scale:2, useCORS:true, allowTaint:false}).then(canvas=>{
+      const link = document.createElement('a');
+      link.download = `${filename}-${new Date().toISOString().slice(0,10)}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    }).catch(err=>{ alert('Image export failed (likely a hotlink/CORS restriction on one of the images): '+err.message); });
+    return;
+  }
   const el = document.getElementById(elId);
   el.classList.add('export-light');
   html2canvas(el, {backgroundColor:'#ffffff', scale:2, useCORS:true, allowTaint:false}).then(canvas=>{
